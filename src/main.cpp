@@ -9,8 +9,6 @@
 #endif
 #include <iostream>
 #include <GL/freeglut.h>
-#include <vec3f.h>
-#include <mathtool.h>
 using namespace std;
 
 int window_width = 800;
@@ -133,9 +131,6 @@ void display(){
 
 int main(int argc, char** argv)
 {
-    lily::vec3f v1(0.0f), v2(1.0f), v3(-1.0f, 2.0f, 0.5f);
-    cout << clamp(v3, v1, v2);
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
