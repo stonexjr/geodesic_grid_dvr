@@ -3,8 +3,24 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.3 FATAL_ERROR)
 PROJECT(geodesic_grid_dvr)
 
 SET(SRC_DIR ./src)
-SET(HEADER )
-SET(SOURCE ${SRC_DIR}/main.cpp)
+SET(HEADER ${SRC_DIR}/dir.h)
+SET(SOURCE ${SRC_DIR}/main.cpp
+           ${SRC_DIR}/dir.cpp
+    )
+
+SET(UTILITY_HEADER ${SRC_DIR}/HostArrayTemplate.h
+    ${SRC_DIR}/netcdf_read.h
+    ${SRC_DIR}/NetCDFFile.h
+    ${SRC_DIR}/NetCDFManager.h
+    )
+
+SET(UTILITY_SOURCE 
+    ${SRC_DIR}/netcdf_read.cpp
+    ${SRC_DIR}/NetCDFFile.cpp
+    ${SRC_DIR}/NetCDFManager.cpp
+    )
+
+SOURCE_GROUP("utility" FILES ${UTILITY_HEADER} ${UTILITY_SOURCE})
 
 IF(WIN32)
     # hide insecure CRT warnings, common practice
@@ -60,6 +76,16 @@ MESSAGE("freeglut possible lib dir: ${FREEGLUT_LIB_DIR}")
 MESSAGE("freeglut possible lib dir: ${FREEGLUT_LIB_DIR2}")
 MESSAGE("freeglut bin dir: ${FREEGLUT_BIN_DIR}")
 
+#Prompt user to specify netcdf installation root.
+SET(NETCDF_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/netcdf" CACHE PATH
+    "Please specify NETCDF installation directory")
+SET(NETCDF_INC_DIR "${NETCDF_ROOT_DIR}/include")
+SET(NETCDF_LIB_DIR "${NETCDF_ROOT_DIR}/lib")
+SET(NETCDF_LIB_DIR2 "${NETCDF_LIB_DIR}/${PLATFORM_NAME}")
+MESSAGE("NETCDF root dir: ${NETCDF_ROOT_DIR}")
+MESSAGE("NETCDF possible lib dir: ${NETCDF_LIB_DIR}")
+MESSAGE("NETCDF possible lib dir: ${NETCDF_LIB_DIR2}")
+
 SET(DAVINCI_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/freeglut-2.8.1" CACHE PATH
     "Please specify DAVINCI installation directory")
 SET(DAVINCI_INC_DIR "${DAVINCI_ROOT_DIR}/include")
@@ -73,7 +99,7 @@ MESSAGE("DAVINCI possible lib dir: ${DAVINCI_LIB_DIR2}")
 INCLUDE_DIRECTORIES(
 ${GLEW_INC_DIR}
 ${FREEGLUT_INC_DIR}
-${FREETYPE_INC_DIR}
+${NETCDF_INC_DIR}
 ${DAVINCI_INC_DIR}
 )
 
@@ -82,12 +108,12 @@ ${GLEW_LIB_DIR}
 ${GLEW_LIB_DIR}/${PLATFORM_NAME}
 ${FREEGLUT_LIB_DIR}
 ${FREEGLUT_LIB_DIR2}
-${FREETYPE_LIB_DIR}
-${FREETYPE_LIB_DIR2}
+${NETCDF_LIB_DIR}
+${NETCDF_LIB_DIR2}
 ${DAVINCI_LIB_DIR}
 ${DAVINCI_LIB_DIR2}
 )
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE})
+ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE} ${UTILITY_HEADER} ${UTILITY_SOURCE})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} Davinci glew freeglut)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Davinci glew freeglut netcdf)

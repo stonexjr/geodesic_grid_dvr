@@ -10,6 +10,7 @@
 #include <iostream>
 #include <GL/freeglut.h>
 #include <mat4.h>
+#include "Dir.h"
 
 using namespace std;
 
