@@ -9,6 +9,8 @@
 #endif
 #include <iostream>
 #include <GL/freeglut.h>
+#include <mat4.h>
+
 using namespace std;
 
 int window_width = 800;
@@ -18,6 +20,13 @@ int	mousetype = -1;
 float xRotate=0.0f, yRotate=0.0f;
 float xTranslate = 0, yTranslate = 0, zTranslate = -5.0f;
 float scale = 1.0f;
+bool needUpdate = true;
+
+davinci::mat4 mvm;
+davinci::mat4 prjMtx;
+
+
+void display();
 
 void keyboard(unsigned char key, int x, int y){
     switch(key) 
@@ -47,7 +56,10 @@ void mouseMotion(int x , int y){
     }
     mouseX = x;
     mouseY = y;   
+    needUpdate = true;
+    display();
 }
+
 void mouseButton(int button, int state, int x , int y){
     printf("mouse button(%d) x=%d, y=%d\n",button,x,y);
     if (button == GLUT_LEFT_BUTTON)
@@ -66,6 +78,8 @@ void mouseButton(int button, int state, int x , int y){
 
     mouseX = x; mouseY = y;
     mousetype = button;
+    needUpdate = true;
+    display();
 }
 
 void mouseWheel(int button, int dir, int x, int y){
@@ -81,6 +95,9 @@ void mouseWheel(int button, int dir, int x, int y){
         scale *= factor;
     }
     cout << "scale=" << scale << endl;
+
+    needUpdate = true;
+    display();
 }
 
 bool initGL(){
@@ -99,8 +116,10 @@ bool initGL(){
 
     glViewport(0,0,window_width, window_height);
 
+    needUpdate = true;
     return true;
 }
+
 void reshape(int w, int h){
     window_width = w; window_height = h;
     glViewport(0,0,w,h);
@@ -114,19 +133,24 @@ void reshape(int w, int h){
     glLoadIdentity();
 }
 void display(){
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-        glTranslatef(xTranslate, yTranslate, zTranslate);
-        glScalef(scale, scale, scale);
-        glRotatef(xRotate, 1,0,0);
-        glRotatef(yRotate, 0,1,0);
+    if (needUpdate){//only refresh when it's necessary.
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glMatrixMode(GL_MODELVIEW);
+        mvm.identity();
+        mvm.rotateYd(yRotate);
+        mvm.rotateXd(xRotate);
+        mvm.scale(scale);
+        mvm.translate(xTranslate, yTranslate, zTranslate);
+
+        glLoadTransposeMatrixf(mvm.get());
 
         glutWireCube(2);
 
-    glutSwapBuffers();
-    glutPostRedisplay();
+        glutSwapBuffers();
+        glutPostRedisplay();
+        needUpdate = false;
+    }
 }
 
 int main(int argc, char** argv)
@@ -136,7 +160,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(window_width, window_height);
     glutCreateWindow("Simple GLUT");
     //glutFullScreen();
-    //glutGameModeString("640x480:32");
+    //glutGameModeString("1024x768:32");
     //glutEnterGameMode();
 
     if (!initGL())
