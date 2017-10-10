@@ -108,7 +108,7 @@ HostIntArrayRef NetCDFFile::addIntArray( const string& var_name,
         dim2 = (dim2limit == -1) ? var_info->dim[1]->length : dim2limit;
         dim3 = (dim3limit == -1) ? var_info->dim[2]->length : dim3limit;
     }
-    HostIntArrayRef array = HostIntArrayRef(new HostIntArrayType((HostIntArrayType::dims)ndim, dim1,dim2,dim3));//boost::shared_ptr<IntArray>(new IntArray(ndim, dim1,dim2,dim3));
+    HostIntArrayRef array = HostIntArrayRef(new HostIntArrayType((HostIntArrayType::dims)ndim, dim1,dim2,dim3));
     m_intArrays[var_id] = array;
     return array;
 }
@@ -151,15 +151,17 @@ bool NetCDFFile::LoadVarData( const string& var_name, const string& var_id,
 {
     char* pBuffer=NULL;
     if(m_floatArrays.find(var_id) != m_floatArrays.end()){
-        //boost::shared_ptr<FloatArray> array = m_floatArrays[var_id];
+
         HostFloatArrayRef array = m_floatArrays[var_id];
         pBuffer = reinterpret_cast<char*>(&(array->m_vars[0]));
+
     }else if (m_intArrays.find(var_id) != m_intArrays.end()){
-        //boost::shared_ptr<IntArray> array = m_intArrays[var_id];
+
         HostIntArrayRef array = m_intArrays[var_id];
         pBuffer = reinterpret_cast<char*>(&(array->m_vars[0]));
+
     }else if (m_doubleArrays.find(var_id) != m_doubleArrays.end())
-    {
+
         HostDoubleArrayRef array = m_doubleArrays[var_id];
         pBuffer = reinterpret_cast<char*>(&(array->m_vars[0]));
         array->fill(0.0);
@@ -172,7 +174,7 @@ bool NetCDFFile::LoadVarData( const string& var_name, const string& var_id,
         //return m_pNetcdf->get_vardata( c_str, time_in, time_out, 0, 1, &pBuffer, true);
     }
 
-    return 0;
+    return false;
 }
 
 //void NetCDFFile::insertFloatArray( const string& var_name, boost::shared_ptr<FloatArray> farray )

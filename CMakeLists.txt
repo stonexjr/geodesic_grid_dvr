@@ -8,6 +8,17 @@ SET(SOURCE ${SRC_DIR}/main.cpp
            ${SRC_DIR}/dir.cpp
     )
 
+SET(MESH_HEADER
+    ${SRC_DIR}/IMesh.h
+    ${SRC_DIR}/GCRMMesh.h
+)
+SET(MESH_SOURCE
+    ${SRC_DIR}/IMesh.cpp
+    ${SRC_DIR}/GCRMMesh.cpp
+)
+
+SOURCE_GROUP("mesh" FILES ${MESH_HEADER} ${MESH_SOURCE})
+
 SET(UTILITY_HEADER ${SRC_DIR}/HostArrayTemplate.h
     ${SRC_DIR}/netcdf_read.h
     ${SRC_DIR}/NetCDFFile.h
@@ -21,6 +32,22 @@ SET(UTILITY_SOURCE
     )
 
 SOURCE_GROUP("utility" FILES ${UTILITY_HEADER} ${UTILITY_SOURCE})
+
+SET(SHADER_SOURCE
+    ${SRC_DIR}/shader/grid_gcrm.vert
+    ${SRC_DIR}/shader/grid_gcrm.geom
+    ${SRC_DIR}/shader/grid_gcrm.frag
+    ${SRC_DIR}/shader/gcrm_triangle_mesh.vert
+    ${SRC_DIR}/shader/gcrm_triangle_mesh.geom
+    ${SRC_DIR}/shader/gcrm_triangle_mesh.frag
+    ${SRC_DIR}/shader/gcrm_hexagon_mesh.vert
+    ${SRC_DIR}/shader/gcrm_hexagon_mesh_frame.geom
+    ${SRC_DIR}/shader/gcrm_hexagon_mesh_fill.geom
+    ${SRC_DIR}/shader/gcrm_hexagon_mesh.frag
+    ${SRC_DIR}/shader/gcrm_dvr.geom
+    ${SRC_DIR}/shader/gcrm_dvr.frag
+)
+SOURCE_GROUP("shader" FILES ${SHADER_SOURCE})
 
 IF(WIN32)
     # hide insecure CRT warnings, common practice
@@ -114,6 +141,16 @@ ${DAVINCI_LIB_DIR}
 ${DAVINCI_LIB_DIR2}
 )
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE} ${UTILITY_HEADER} ${UTILITY_SOURCE})
+ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE} ${UTILITY_HEADER} ${UTILITY_SOURCE}
+    ${MESH_HEADER} ${MESH_SOURCE} ${SHADER_SOURCE})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} Davinci glew freeglut netcdf)
+
+#Copy shader files
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+   "${SRC_DIR}/shader" "${PROJECT_BINARY_DIR}/shader")
+
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+   "${SRC_DIR}/shader" "${PROJECT_BINARY_DIR}/\$\(CONFIGURATION\)/shader")

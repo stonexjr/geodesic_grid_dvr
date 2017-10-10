@@ -11,6 +11,7 @@
 #include <GL/freeglut.h>
 #include <mat4.h>
 #include "Dir.h"
+#include "GCRMMesh.h"
 
 using namespace std;
 
@@ -23,11 +24,37 @@ float xTranslate = 0, yTranslate = 0, zTranslate = -5.0f;
 float scale = 1.0f;
 bool needUpdate = true;
 
+string gridFilePath = "C:/fusion/gcrm_220km/grid.nc";
+string dataFilePath = "C:/fusion/gcrm_220km/vorticity_19010115_000000.nc";
+string dataVarName = "vorticity";
+
+IMeshRef m_mesh;
+
 davinci::mat4 mvm;
 davinci::mat4 prjMtx;
 
 
 void display();
+
+void loadData(){
+
+    if (!m_mesh){
+        m_mesh = IMeshRef(new GCRMMesh());
+    }
+    int timeStart = 0, timeEnd = 1;
+    m_mesh->ReadGrid(gridFilePath);
+    m_mesh->SetDrawMeshType("hexagon");
+    //load data value.
+    cout << "Load data " << dataVarName << " from data file" << dataFilePath << endl;
+
+    m_mesh->LoadClimateData(dataFilePath, dataVarName, 0, 0);
+    m_mesh->normalizeClimateDataArray(dataVarName);
+    m_mesh->SetCurrentGlobalTimeSliceId(0);
+
+    m_mesh->Remesh();
+    m_mesh->SetDataNew(true);
+    m_mesh->InitShaders();
+}
 
 void keyboard(unsigned char key, int x, int y){
     switch(key) 
@@ -113,6 +140,7 @@ bool initGL(){
         fflush(stderr);
         return false;
     }
+    loadData();
     glClearColor(0,0,0,1.0);
 
     glViewport(0,0,window_width, window_height);
@@ -159,7 +187,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowSize(window_width, window_height);
-    glutCreateWindow("Simple GLUT");
+    glutCreateWindow("Direct Volume Rendering of Geodesic Grid");
     //glutFullScreen();
     //glutGameModeString("1024x768:32");
     //glutEnterGameMode();

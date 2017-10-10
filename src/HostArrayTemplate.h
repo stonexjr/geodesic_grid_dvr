@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <vector>
+#include <memory>
 #ifdef USE_CUDA
 #include <helper_math.h>
 #include "DevArrayTemplate.h"
