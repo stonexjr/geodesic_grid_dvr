@@ -13,8 +13,6 @@ in G2F{
 
 uniform vec4 e_lightPos;
 uniform bool enableLight;
-uniform int drawLine;
-uniform int drawWorldMap;
 
 out vec4 out_Color;
 

@@ -160,7 +160,7 @@ bool NetCDFFile::LoadVarData( const string& var_name, const string& var_id,
         HostIntArrayRef array = m_intArrays[var_id];
         pBuffer = reinterpret_cast<char*>(&(array->m_vars[0]));
 
-    }else if (m_doubleArrays.find(var_id) != m_doubleArrays.end())
+    }else if (m_doubleArrays.find(var_id) != m_doubleArrays.end()){
 
         HostDoubleArrayRef array = m_doubleArrays[var_id];
         pBuffer = reinterpret_cast<char*>(&(array->m_vars[0]));

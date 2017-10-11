@@ -1,9 +1,3 @@
-/*
-#include <QApplication>
-#include <QFile>
-#include <QFileDialog>
-#include <QDebug>
-*/
 #include "IMesh.h"
 #include "GLTexture1D.h"
 #include "GLError.h"
@@ -16,9 +10,9 @@ char* IMesh::m_interpName[3]={"Prism", "Tetra", "MVI"};
 
 IMesh::IMesh(void)
     :m_netmngr(new NetCDFManager()),m_gridSimpleFileName(""),
-    m_bFillMesh(false),m_isDataNew(true),m_volumeRender(NULL),m_interpType(Prism),
-    m_timeGlobal(0),m_curFileStep(0),m_curLocalTimeStep(0),m_totalTimeSteps(0),
-    m_timing(0.0f)
+    m_bFillMesh(false),m_isDataNew(true),
+    m_timeGlobal(0),m_curFileStep(0),m_curLocalTimeStep(0),
+    m_totalTimeSteps(0), m_timing(0.0f)
 {
 }
 
@@ -52,16 +46,7 @@ NetCDFFileRef IMesh::createGridFile( const string& gridFilePath )
     return (*m_netmngr)[m_gridSimpleFileName];
 }
 
-/*
-QString IMesh::makeSimpleFileName( const QString& fileName ) const
-{
-    QString nativeFileName = QDir::toNativeSeparators(fileName);
-    QString sptr = QDir::separator();
-    return nativeFileName.section(sptr,-1,-1,QString::SectionSkipEmpty);
-}
-*/
-
-HostIntArrayRef IMesh::GetIntArray( const QString& varName )
+HostIntArrayRef IMesh::GetIntArray( const string& varName )
 {
     //for each netcdf file managed by netcdf file manager
     HostIntArrayRef pArray =
@@ -74,7 +59,7 @@ HostIntArrayRef IMesh::GetIntArray( const QString& varName )
     return (*m_netmngr)[m_climateVariableFileName]->getIntArray()[varName];
 }
 
-HostFloatArrayRef IMesh::GetFloatArray( const QString& varName )
+HostFloatArrayRef IMesh::GetFloatArray( const string& varName )
 {
     HostFloatArrayRef pArray =
         (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()[varName];
@@ -86,7 +71,7 @@ HostFloatArrayRef IMesh::GetFloatArray( const QString& varName )
     return (*m_netmngr)[m_climateVariableFileName]->getFloatArray()[varName];
 }
 
-HostDoubleArrayRef IMesh::GetDoubleArray( const QString& varName )
+HostDoubleArrayRef IMesh::GetDoubleArray( const string& varName )
 {
     HostDoubleArrayRef pArray =
         (*m_netmngr)[m_gridSimpleFileName]->getDoubleArray()[varName];
@@ -136,7 +121,7 @@ void IMesh::LoadGridVar(const string& gridFileName,const vector<string>& varName
     }
 
     //The variable data array is loaded from here.
-    std::for_each(varNames.begin(), varNames.end(), [&](string& varName){
+    std::for_each(varNames.begin(), varNames.end(), [&](const string& varName){
         NetCDF_var* pVarInfo = netcdf->GetVarInfo(varName);
         if (!pVarInfo)
         {
@@ -157,9 +142,6 @@ void IMesh::LoadGridVar(const string& gridFileName,const vector<string>& varName
     });
 }
 
-void IMesh::InitShaders()
-{
-}
 
 davinci::GLTextureAbstract* IMesh::RenderMeshTo3DTexture( int width, int height )
 {

@@ -27,11 +27,6 @@ uniform isamplerBuffer corner_cells;
 uniform int nLayers;
 uniform int iLayers;
 //
-uniform float timing;
-uniform int drawLine;
-uniform int drawWorldMap;
-uniform float ratio;
-uniform int max_invisible_cell_id;
 
 #define  PI_OVER_2 1.5707963
 #define  _2_OVER_PI 0.63661978
@@ -39,16 +34,9 @@ uniform int max_invisible_cell_id;
 #define  INV_PI 0.31830989
 #define  GLOBLE_RADIUS PI_OVER_2
 
-vec3 sphere_plane_transition(vec3 xyz, float lat, float lon)
-{
-	return mix(xyz, vec3(lon, lat, 0.0), timing);
-}
-
 
 void main(void)
 {
-	if (v2g[0].corner_id < max_invisible_cell_id)
-		return;
 
 	int iTime = 0;
 	//only consider outter most surface mesh.
@@ -74,7 +62,6 @@ void main(void)
 			GLOBLE_RADIUS * cos(lat) * cos(lon),
 			1.0);
 
-		xyzw.xyz = sphere_plane_transition(xyzw.xyz, lat, lon);
 
 		gl_Position = projMat * modelViewMat * xyzw;
 		g2f.normal = normalMat * normalize(xyzw.xyz);

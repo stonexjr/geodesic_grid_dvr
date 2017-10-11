@@ -13,14 +13,9 @@ in G2F{
 
 uniform vec4 e_lightPos;
 uniform bool enableLight;
-uniform int drawLine;
-uniform int drawWorldMap;
 
 out vec4 out_Color;
 
-#define invPi 0.3183
-#define inv2Pi 0.1591
-#define alphaThreshold 0.1
 
 vec4 GetColor(in float scale){
 	vec4 tempColor = texture(tf, scale);

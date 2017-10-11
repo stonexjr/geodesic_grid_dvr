@@ -1,40 +1,30 @@
 #ifndef _IMESH_H_
 #define _IMESH_H_
-#pragma once
+#include <map>
 #include "vec3f.h"
 //#include "config.h"
 #include "HostArrayTemplate.h"
 #include <GLFrameBufferObject.h>
-#include <GLClickable.h>
 #include <GLTexture1D.h>
 #include <GLTexture3D.h>
+#include <GLShader.h>
 
-class IVolumeRender;//forward declaration: IVolumeRender and IMesh are inter-referenced.
-class GPUVolumeRender;
-class CPUVolumeRender;
-class ConfigManager;
-class QTFEditor;
 class NetCDFFile;
 class NetCDFManager;
 typedef std::shared_ptr<NetCDFFile> NetCDFFileRef;
 typedef std::shared_ptr<NetCDFManager> NetCDFManagerRef ;
 
-class IMesh : public davinci::GLClickable
+class IMesh
 {
-    friend class IVolumeRender;
-    friend class CPUVolumeRender;
-    friend class GPUVolumeRender;
 public:
-
-
     IMesh();
     IMesh(const NetCDFManagerRef& netmngr);
 
     virtual ~IMesh(void);
 
     virtual davinci::GLShaderRef getGridShader()=0;
-    virtual void InitShaders();
-    virtual void refresh()=0;
+    virtual void InitShaders(map<string, map<string, string> >& shaderConfig)=0;
+    virtual void Refresh()=0;
     //virtual void InitTexture();
     //virtual void updateHistogram(QTFEditor * tfEditor)=0; 
     //set transfer function for GLSL program. 
@@ -63,26 +53,23 @@ public:
     //virtual void uploadClimateValue()=0;
     virtual int	 GetMaxIdxLayer() const = 0;
     virtual void SetMaxIdxLayer(int val) = 0;
-    QString GetGridFileName() const { return m_gridSimpleFileName; }
-    virtual QString GetClimateVariableName() const { return m_climateVariableUniqueId; }
+    string GetGridFileName() const { return m_gridSimpleFileName; }
+    virtual string GetClimateVariableName() const { return m_climateVariableUniqueId; }
 //    QString GetClimateVaribleFileName() const { return m_climateVaribleFileName; }
 //    void	SetClimateVaribleFileName(const QString& val) { m_climateVaribleFileName = val; }
+    /*
     virtual bool SetCurrentGlobalTimeSliceId(int timeId){ m_timeGlobal = timeId; return true;}
     int     GetCurrentGlobalTimeSliceId() const { return  m_timeGlobal;}
     int     GetCurrentLocalTimeSliceId() const { return  m_curLocalTimeStep;}
+    */
     int     GetTotalTimeSteps() const { return  m_totalTimeSteps;}
     int     GetCurrentFileId() const { return  m_curFileStep;}
 
-    HostIntArrayRef   GetIntArray(const QString& varName);
-    HostFloatArrayRef GetFloatArray(const QString& varName);
-    HostDoubleArrayRef GetDoubleArray(const QString& varName);
+    HostIntArrayRef   GetIntArray(const string& varName);
+    HostFloatArrayRef GetFloatArray(const string& varName);
+    HostDoubleArrayRef GetDoubleArray(const string& varName);
     bool IsFillMesh() const { return m_bFillMesh; }
     virtual void SetFillMesh(bool val) { m_bFillMesh = val; }
-
-    IVolumeRender* GetVolumeRender() const { return m_volumeRender; }
-    void SetVolumeRender(const IVolumeRender* val) { m_volumeRender = const_cast<IVolumeRender*>(val); }
-
-    virtual davinci::GLFrameBufferObjectRef getFBOVizSurfaceRef()=0;
 
     virtual void bindVisSurfacePixPositionFBO();
     virtual void unbindVisSurfacePixPositionFBO();
@@ -102,9 +89,6 @@ public:
     //If the data has been reloaded upon rendering of next frame.
     bool        GetIsDataNew() const { return m_isDataNew;}
 
-    //InterpolationType	GetInterpolationType() const { return m_interpType; }
-    //void	SetInterpolationType(InterpolationType val) { m_interpType = val; }
-    //char*   GetInterpolationName(){ return m_interpName[(int)m_interpType];}
     virtual void setInVisibleCellId(int m_maxNcells);
     virtual void SetTiming(float timing);
     virtual void SetStepSize(float val);
@@ -132,8 +116,6 @@ protected:
     davinci::vec3f  m_bgColor3f;
     static char* m_interpName[3];
     string m_meshType;
-    //GridType m_gridType;
-    IVolumeRender* m_volumeRender;
     NetCDFManagerRef m_netmngr;
     string m_gridSimpleFileName;//eg. "grid.nc"
     string m_climateVariableFileName;//eg. "vorticity_19010101_000000.nc"
@@ -142,7 +124,6 @@ protected:
     string m_datasetPath;//eg."H:/fusion/data/atmos/atmos_220km/gcrm_220km/"
     bool    m_bFillMesh;
     bool    m_isDataNew;
-    InterpolationType	m_interpType;
     davinci::GLTexture1DRef m_tfTex;
     davinci::vec2f m_split_range;
 };

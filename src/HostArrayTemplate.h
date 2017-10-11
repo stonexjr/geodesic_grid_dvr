@@ -11,6 +11,7 @@
 #include "DevArrayTemplate.h"
 #endif
 #include <stdarg.h>
+#include <DError.h>
 
 using namespace std;
 //Multi-dimensional array
@@ -152,7 +153,8 @@ void HostArray<T>::getMinMax(T& min_t, T& max_t){
     min_t = *( std::min_element(m_vars.begin(), m_vars.end()) );
     max_t = *( std::max_element(m_vars.begin(), m_vars.end()) );
 #endif
-    qDebug("min value=%f max value=%f",min_t, max_t);
+    fprintf(stderr, "min value=%f max value=%f",min_t, max_t);
+    fflush(stderr);
 }
 
 template<typename T>
@@ -167,7 +169,9 @@ void HostArray<T>::logNormalize()
         T min_t = 0;//*( std::min_element(m_vars.begin(), m_vars.end()) );
         T max_t = log( *( std::max_element(m_vars.begin(), m_vars.end()) ) );
 #endif
-        qDebug("log min value=%f log max value=%f",min_t, max_t);
+        fprintf(stderr, "log min value=%f log max value=%f",min_t, max_t);
+        fflush(stderr);
+
         float inv_scale = 1.0f/(float)(max_t - min_t);
     int size = m_vars.size();
     for (int i=0 ; i < size ; ++i)
@@ -187,8 +191,8 @@ T& HostArray<T>::operator()( int n,... )
 {//Given high dimensional index(eg. z,y,x), calculate its
     // equivalent global index in 1D array m_vars.
     //so that gIdx = z*ydim*xdim + y*xdim + x;
-        //assert(n==m_ndim);
-        Q_ASSERT_X(n==m_ndim, "HostArray<T>::operator()", "n != m_ndim");
+    //assert(n==m_ndim);
+    D_ASSERT(n == m_ndim, "HostArray<T>::operator() n != m_ndim", DERROR_ERROR);
     va_list ap;
     int i;
     va_start(ap, n);
@@ -208,7 +212,7 @@ T HostArray<T>::operator()( int n,... ) const
     // equivalent global index in 1D array m_vars.
     //so that gIdx = z*ydim*xdim + y*xdim + x;
         //assert(n==m_ndim);
-        Q_ASSERT_X(n==m_ndim, "HostArray<T>::operator()", "n != m_ndim");
+    D_ASSERT(n == m_ndim, "HostArray<T>::operator() n != m_ndim", DERROR_ERROR);
     va_list ap;
     int i;
     va_start(ap, n);
