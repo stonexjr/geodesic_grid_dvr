@@ -1,3 +1,25 @@
+/*
+Copyright (c) 2013-2017 Jinrong Xie (jrxie at ucdavis dot edu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #ifndef _GCRM_MESH_H_
 #define _GCRM_MESH_H_
 #pragma once
@@ -30,7 +52,6 @@ public:
     GCRMMesh(void);
     virtual ~GCRMMesh(void);
 
-    virtual davinci::GLShaderRef getGridShader();
     virtual void InitShaders(map<string, map<string, string> >& shaderConfig);
     virtual void Refresh();
     virtual void glslSetTransferFunc(const davinci::GLTexture1DRef tfTex);
@@ -40,43 +61,37 @@ public:
 
     virtual void Remesh();
 
-    virtual void RenderGrid(bool bFillMesh=false, bool bLighting=false);
+    virtual void RenderGrid();
 
-
+    virtual void ToggleLighting(bool val);
+    virtual void ToggleWireframe(bool v);
+    virtual void SetLight(davinci::GLLights light);
 
     virtual int	 GetMaxIdxLayer() const { return m_maxIdxLayer; }
     virtual void SetMaxIdxLayer(int val);
-    virtual void SetFillMesh(bool val);
-    virtual void SetDrawMeshType(const string& meshType);
+    //virtual void SetSolidMesh(bool val);
+    virtual void SetMeshType(const string& meshType);
     virtual void SetStepSize(float val);
-    virtual void SetLightParam(davinci::vec4f &lightParam);
+    virtual void SetMaterial(davinci::vec4f &material);
 
     virtual void volumeRender();
 
 protected:
-    virtual void CreateVBOTriangleMesh();
-    virtual void CreateVBOHexagonMesh();
-    virtual davinci::GLVertexBufferObjectRef CreateVBOTriangle();
-    virtual davinci::GLIndexBufferObjectRef  CreateIBOHexagon();
-    virtual davinci::GLVertexBufferObjectRef CreateVBOTrianglePos();
-
-    virtual  void	RenderRemeshedGridWithLayers(bool bFillMesh, bool bLighting);
-    void	RenderHexagonalGridLayers(bool bFillMesh, bool bLighting);
-
     //normalize the variable 'varName' values
     virtual void normalizeClimateDataArray(const string& varName);
 
-    void RenderTriangleGridConnc(bool bFillMesh, bool bLighting);
-    void RenderHexagonalGridConnc(bool bFillMesh, bool bLighting);
+    void CreateVBOTriangleMesh();
+    void CreateVBOHexagonMesh();
+    void CreateTBOConnectivity();
+
+    void RenderTriangleGridConnc();
+    void RenderHexagonalGridConnc();
 
 protected:
     string getUniqueVarName(const string& varFilePath, const string& varName) const;
 
-    //bool fromGlobalTimeIdToLocalId(int gtimeId, int& iFile, int &localTimeId);
-    void CreateTBOConnectivity();
     int		m_maxIdxLayer;
     nc_type m_dataType;
-    map<string, davinci::vec2i> m_dataFileTimeStepCounts;
 
     //VBO used for geodesic grid geometry definition.
     davinci::GLIndexBufferObjectRef   m_iboTriangle;	//triangle mesh index buffer
@@ -96,19 +111,8 @@ protected:
     davinci::GLVertexArrayObjectRef m_pVAOHexagonGridsVtxCellIdScalar;//hexagon geometry info
     davinci::GLVertexArrayObjectRef m_pVAOHexagonGridsVtxPos;//hexagon geometry for cell id. 
     davinci::GLVertexArrayObjectRef m_pVAOTrianglePos;//triangle geometry for cell id. 
-    //std::shared_ptr<davinci::GLVertexBufferObject > m_vboHexagonLayerColumn;//triangle mesh layer column lines.
     davinci::GLIndexBufferObjectRef m_iboHexagon;	//hexagon mesh index buffer
   
-    //Texture used for worldMap
-    davinci::GLTexture2DRef m_tex2d_worldmap;
-  
-    //render to 3d texture
-    davinci::GLVertexArrayObjectRef m_pVAOTrianglePosScalar;//normal triangular grid rendering with colormap.
-    davinci::GLVertexBufferObjectRef m_vboTrianglePos;
-    davinci::GLFrameBufferObjectRef m_fboResampling;
-    davinci::GLTexture3DRef m_tex3d;//resample the original grid to regular grid.
-    davinci::GLTexture2DRef m_tex2d;//resample the original grid to regular grid.
-
     //texture1d's for original connectivity information
     davinci::GLTextureBufferObjectRef m_tex1d_grid_center_lat;
     davinci::GLTextureBufferObjectRef m_tex1d_grid_center_lon;

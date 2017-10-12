@@ -1,3 +1,25 @@
+/*
+Copyright (c) 2013-2017 Jinrong Xie (jrxie at ucdavis dot edu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "GCRMMesh.h"
 #include "GL/glew.h"
 //#include "GL/glut.h"
@@ -7,10 +29,8 @@
 //#include <QGLWidget>
 #include <vec3i.h>
 //#include "util.h"
-//#include "ConfigManager.h"
 #include "GLError.h"
 #include <GLUtilities.h>
-//#include "QTFEditor.h"
 #include "GLError.h"
 #include "GLContext.h"
 #include "NetCDFFile.h"
@@ -30,25 +50,19 @@ GCRMMesh::GCRMMesh(void):
     IMesh(),m_maxIdxLayer(0)
 {
     //m_gridType = GCRMMESH;
-    SetDrawMeshType("triangle");
+    SetMeshType("triangle");
     davinci::GLError::glCheckError(__func__);
-    m_split_range = vec2f(0.0);
 }
 
 GCRMMesh::~GCRMMesh(void)
 {
 } 
 
-GLShaderRef GCRMMesh::getGridShader()
-{
-    return m_shaders["grid_gcrm"];//m_volumeRender->GetShader("grid_gcrm");
-}
-
 void GCRMMesh::InitShaders(map<string, map<string, string> >& shaderConfig)
 {
     m_shaderConfig = shaderConfig;
-    vec4f lightParam(0.5f/*Kamb*/, 0.83f/*Kdif*/, 0.89f/*Kspe*/, 20.0f/*Kshi*/);
-    cout << "** lightParam=" << lightParam << endl;
+    vec4f materialDefault(0.5f/*Kamb*/, 0.83f/*Kdif*/, 0.89f/*Kspe*/, 20.0f/*Kshi*/);
+    cout << "** Default material=" << materialDefault << endl;
     //shader for rendering mesh directly from connectivity texture
     //dual triangular mesh
     string shaderName = "gcrm_triangle_mesh";
@@ -58,7 +72,7 @@ void GCRMMesh::InitShaders(map<string, map<string, string> >& shaderConfig)
     shader->loadGeomShaderFile(shaderConfig[shaderName]["geometry_shader"]);// qPrintable(config->m_shaderFiles[4]));
     shader->loadFragShaderFile(shaderConfig[shaderName]["fragment_shader"]);// qPrintable(config->m_shaderFiles[5]));
     shader->CreateShaders();
-    shader->SetIntUniform("enableLight", true);// config->m_bEnableLighting);
+    shader->SetBoolUniform("enableLight", true);
     m_shaders[shader->getShaderName()] = shader; 
 
     //hexagon mesh 
@@ -67,16 +81,16 @@ void GCRMMesh::InitShaders(map<string, map<string, string> >& shaderConfig)
     shader->loadVertexShaderFile(shaderConfig[shaderName]["vertex_shader"]);// qPrintable(config->m_shaderFiles[6]));
     /*
     */
-    if (m_bFillMesh)
+    if (m_bWireframe)
     {
-        shader->loadGeomShaderFile(shaderConfig[shaderName]["geometry_shader_fill"]);// qPrintable(config->m_shaderFiles[8]));//solid fill
-    }else{
         shader->loadGeomShaderFile(shaderConfig[shaderName]["geometry_shader_frame"]);// qPrintable(config->m_shaderFiles[7]));//frame
+    }else{
+        shader->loadGeomShaderFile(shaderConfig[shaderName]["geometry_shader_fill"]);// qPrintable(config->m_shaderFiles[8]));//solid fill
     }
     //  shader->loadGeomShaderFile(qPrintable(config->m_shaderFiles[7]));//frame
     shader->loadFragShaderFile(shaderConfig[shaderName]["fragment_shader"]);// qPrintable(config->m_shaderFiles[9]));
     shader->CreateShaders();
-    shader->SetIntUniform("enableLight", true);
+    shader->SetBoolUniform("enableLight", true);
     m_shaders[shader->getShaderName()] = shader;
 
     //volume ray casting using my proposed method
@@ -86,9 +100,9 @@ void GCRMMesh::InitShaders(map<string, map<string, string> >& shaderConfig)
     shader->loadGeomShaderFile(shaderConfig[shaderName]["geometry_shader"]);// qPrintable(config->m_shaderFiles[10]));
     shader->loadFragShaderFile(shaderConfig[shaderName]["fragment_shader"]);// qPrintable(config->m_shaderFiles[11]));
     shader->CreateShaders();
-    shader->SetIntUniform("enableLight", true);
+    shader->SetBoolUniform("enableLight", true);
     shader->SetFloatUniform("stepsize", 0.01f);
-    shader->SetFloat4Uniform("lightParam", lightParam);
+    shader->SetFloat4Uniform("material", materialDefault);
     m_shaders[shader->getShaderName()] = shader; 
 }
 
@@ -100,44 +114,18 @@ void GCRMMesh::Refresh()
     }
 }
 
-void GCRMMesh::SetFillMesh(bool val)
-{
-    m_bFillMesh = val;
-    if (m_meshType == "hexagon")
-    {
-        string shaderName = "gcrm_hexagon_mesh";
-        GLShaderRef shader = m_shaders[shaderName];
-        if (m_bFillMesh)
-        {
-            shader->loadGeomShaderFile(m_shaderConfig[shaderName]["geometry_shader_fill"]);// qPrintable(config->m_shaderFiles[8]));//solid fill
-        }else{
-            shader->loadGeomShaderFile(m_shaderConfig[shaderName]["geometry_shader_frame"]);// qPrintable(config->m_shaderFiles[7]));//frame
-        }
-        shader->CreateShaders();
-    }
-}
-
-void GCRMMesh::SetDrawMeshType(const string& meshType)
+void GCRMMesh::SetMeshType(const string& meshType)
 {
     m_meshType = meshType;
     if (m_meshType == "hexagon" && !m_shaders.empty())
     {
-        SetFillMesh(m_bFillMesh);
+        ToggleWireframe(m_bWireframe);
     }
 }
 
 void GCRMMesh::glslSetTransferFunc( const davinci::GLTexture1DRef tfTex )
 {
     IMesh::glslSetTransferFunc(tfTex);
-    //IMesh::InitShaders();
-    /*
-    GLShaderRef shader = m_shaders["grid_gcrm"];//m_volumeRender->GetShader("grid_gcrm");
-    if (!shader)
-    {
-        GLError::ErrorMessage(string(__func__)+string("Please initialize gridShader by calling GCRMMesh::InitShaders()!\n"));
-    }
-    shader->SetSamplerUniform("tf", &*m_tfTex);
-    */
 
     GLShaderRef
     shader = m_shaders["gcrm_triangle_mesh"];
@@ -151,9 +139,8 @@ void GCRMMesh::glslSetTransferFunc( const davinci::GLTexture1DRef tfTex )
 }
 
 //***********************************************************************************
-// Access:    virtual public
 // Description: Remesh the GCRM mesh by generating corner_to_cells and corner_to_edges
-// table.
+// connectivity table.
 //***********************************************************************************
 void GCRMMesh::Remesh()
 {
@@ -238,7 +225,6 @@ void GCRMMesh::Remesh()
     HostIntArrayRef varEdgeCells = HostIntArrayRef(new HostIntArrayType(HostIntArrayType::DIM2, nEdges, nCellsPerEdge) );
     varEdgeCells->fill(-1);
     for (int iCell = 0; iCell < nCell ; iCell++){//for each hex cell
-        //int idxPrevEdge = -1;
         for (int iEdge = 0; iEdge < 6 ; iEdge++){//for each hex edge
             int  idxEdge = (*varCellEdges)[iCell * 6 + iEdge];//global index of ith edge of iCell.
             int  j=0;
@@ -249,8 +235,6 @@ void GCRMMesh::Remesh()
                     //Degeneracy: hexagon cell becomes pentagon.
                     //avoid duplicate edge. Because there're some pentagons mixed in the hexagon mesh.
                     bHasDuplicate = true;
-                    //qDebug("Duplicated edge found in cell%d, %dth edge(idx=%d) and %dth edge(idx=%d)\n",
-                    //	iCell, iEdge, idxEdge, iEdge-1, idxPrevEdge );
                     break;
                 }
                 ++j;
@@ -258,38 +242,21 @@ void GCRMMesh::Remesh()
             if (j < 3  && !bHasDuplicate){
                 (*varEdgeCells)[idxEdge * 2 + j] = iCell;
             }
-            //idxPrevEdge = idxEdge;
         }
     }
     (*m_netmngr)[m_gridSimpleFileName]->insertIntArray("edge_cells",varEdgeCells);
 }
 
 
-//#define DEBUG_RESAMPLING
-
-void GCRMMesh::RenderGrid( bool bFillMesh, bool bLighting/*=false*/ )
+void GCRMMesh::RenderGrid()
 {
     if (m_meshType == "triangle")
     {
-        //RenderRemeshedGridWithLayers(bFillMesh, bLighting);
-        //printf("**********RenderRemeshedGrid**********\n.");
-        //RenderRemeshedGrid(bFillMesh, bLighting);
-        RenderTriangleGridConnc(bFillMesh, bLighting);
-        //Resampling(2048, 2048);
-#ifndef DEBUG_RESAMPLING
-        //Resampling(1024, 1024);
-        //Resampling(200, 100);
-#else
-        Resampling(m_scrWidth, m_scrHeight);
-#endif
-        //printf("**********end of RenderRemeshedGrid**********\n.");
+        RenderTriangleGridConnc();
     }
     else
     {
-        //RenderHexagonalGridLayers(bFillMesh, bLighting);
-        //printf("********hexagon*******\n");
-        //RenderHexagonalGrid(bFillMesh, bLighting);
-        RenderHexagonalGridConnc(bFillMesh, bLighting);
+        RenderHexagonalGridConnc();
     }
 }
 
@@ -324,14 +291,10 @@ void GCRMMesh::CreateTBOConnectivity()
     GLShaderRef shader_triangle = m_shaders["gcrm_triangle_mesh"];
     GLShaderRef shader_hexagon  = m_shaders["gcrm_hexagon_mesh"];
     GLShaderRef shader_dvr      = m_shaders["gcrm_dvr"];
-    GLShaderRef shader_dvr_regular = m_shaders["gcrm_dvr_regular"];
-    GLShaderRef shader_resample = m_shaders["resampling"];
 
     assert(shader_triangle);
     assert(shader_hexagon);
-    assert(shader_resample);
     assert(shader_dvr);
-    assert(shader_dvr_regular);
     
     if (!m_tex1d_grid_edge_corners)
     {
@@ -352,10 +315,8 @@ void GCRMMesh::CreateTBOConnectivity()
         m_tex1d_grid_center_lat->upload(nCenters*sizeof(float), nCenters, varCenterLat->data());
     }
     shader_triangle->SetSamplerUniform("center_lat", &*m_tex1d_grid_center_lat);
-    shader_resample->SetSamplerUniform("center_lat", &*m_tex1d_grid_center_lat);
     shader_hexagon->SetSamplerUniform("center_lat", &*m_tex1d_grid_center_lat);
     shader_dvr->SetSamplerUniform("center_lat", &*m_tex1d_grid_center_lat);
-    shader_dvr_regular->SetSamplerUniform("center_lat", &*m_tex1d_grid_center_lat);
 
     if (!m_tex1d_grid_center_lon)
     {
@@ -365,10 +326,8 @@ void GCRMMesh::CreateTBOConnectivity()
         m_tex1d_grid_center_lon->upload(nCenters*sizeof(float), nCenters, varCenterLon->data());
     }
     shader_triangle->SetSamplerUniform("center_lon", &*m_tex1d_grid_center_lon);
-    shader_resample->SetSamplerUniform("center_lon", &*m_tex1d_grid_center_lon);
     shader_hexagon->SetSamplerUniform("center_lon", &*m_tex1d_grid_center_lon);
     shader_dvr->SetSamplerUniform("center_lon", &*m_tex1d_grid_center_lon);
-    shader_dvr_regular->SetSamplerUniform("center_lon", &*m_tex1d_grid_center_lon);
 
     if (!m_tex1d_grid_corner_lat)
     {
@@ -422,35 +381,13 @@ void GCRMMesh::CreateTBOConnectivity()
         int nLayers = (int) varClimate->m_dimsizes[2];
         shader_triangle->SetIntUniform("nLayers", nLayers);
         shader_hexagon->SetIntUniform("nLayers", nLayers);
-        shader_resample->SetIntUniform("nLayers", nLayers);
         shader_dvr->SetIntUniform("nLayers", nLayers);
-        shader_dvr_regular->SetIntUniform("nLayers", nLayers);
         assert(nCenters == varCenterLat->m_dimsizes[0]);
         m_tex1d_grid_center_val = GLTextureBufferObjectRef(new GLTextureBufferObject(GL_R32F, GL_STATIC_DRAW));
         m_tex1d_grid_center_val->setName("center_val");
         m_tex1d_grid_center_val->upload(nTimes*nCenters*nLayers*sizeof(float), nTimes*nCenters*nLayers, varClimate->data());
-        //dump one layer of scalar value
-        /*
-        std::vector<float> dump(nCenters, 0.0f);
-        const float* src = reinterpret_cast<const float*>(varClimate->data());
-        for (int i = 0; i < nCenters; i++)
-        {
-            dump[i] = src[i*nLayers];
-        }
-        string ofile = "vorticity.bin";
-        std::ofstream ofs(ofile, ios::binary);
-        if (!ofs){
-            davinci::GLError::ErrorMessage("Cannot open file:" + ofile);
-        }
-        int nsize = dump.size();
-        ofs.write(reinterpret_cast<char*>(&nsize), sizeof(nsize));
-        ofs.write(reinterpret_cast<char*>(dump.data()), sizeof(float) * dump.size());
-        davinci::GLError::ErrorMessage(string("dump scalar value"));
-        ofs.close();
-        */
     }
     shader_triangle->SetSamplerUniform("center_val", &*m_tex1d_grid_center_val);
-    shader_resample->SetSamplerUniform("center_val", &*m_tex1d_grid_center_val);
     shader_hexagon->SetSamplerUniform("center_val", &*m_tex1d_grid_center_val);
     shader_dvr->SetSamplerUniform("center_val", &*m_tex1d_grid_center_val);
 
@@ -478,23 +415,18 @@ void GCRMMesh::CreateTBOConnectivity()
         m_tex1d_grid_corner_cells->upload(nCorners*nDegrees*sizeof(int), nCorners*nDegrees, varCornerCells->data());
     }
     shader_triangle->SetSamplerUniform("corner_cells", &*m_tex1d_grid_corner_cells);
-    shader_resample->SetSamplerUniform("corner_cells", &*m_tex1d_grid_corner_cells);
     //shader_hexagon->SetSamplerUniform("corner_cells", &*m_tex1d_grid_corner_cells);
     shader_dvr->SetSamplerUniform("corner_cells", &*m_tex1d_grid_corner_cells);
-    shader_dvr_regular->SetSamplerUniform("corner_cells", &*m_tex1d_grid_corner_cells);
 
     if (!m_tex1d_grid_corner_edges)
     {
         int nCorners = (int) varCornerEdges->m_dimsizes[0];
         int nDegrees = (int) varCornerEdges->m_dimsizes[1];
         assert(nDegrees == 3);
-        //m_tex1d_grid_corner_edges = GLTexture1DRef(new GLTexture1d(nCorners, GL_RGB32I, GL_RGB_INTEGER, GL_INT,varCornerEdges->data()));
         m_tex1d_grid_corner_edges = GLTextureBufferObjectRef(new GLTextureBufferObject(GL_RGB32I, GL_STATIC_DRAW));
         m_tex1d_grid_corner_edges->setName("corner_edges");
         m_tex1d_grid_corner_edges->upload(nCorners*nDegrees*sizeof(int), nCorners*nDegrees, varCornerEdges->data());
     }
-    //shader_triangle->SetSamplerUniform("corner_edges", &*m_tex1d_grid_corner_edges);
-    //shader_hexagon->SetSamplerUniform("corner_edges", &*m_tex1d_grid_corner_edges);
     shader_dvr->SetSamplerUniform("corner_edges", &*m_tex1d_grid_corner_edges);
 
     if (!m_tex1d_grid_edge_cells)
@@ -506,8 +438,6 @@ void GCRMMesh::CreateTBOConnectivity()
         m_tex1d_grid_edge_cells->setName("edge_cells");
         m_tex1d_grid_edge_cells->upload(nCorners*nDegrees*sizeof(int), nCorners*nDegrees, varEdgeCells->data());
     }
-    //shader_triangle->SetSamplerUniform("edge_cells", &*m_tex1d_grid_edge_cells);
-    //shader_hexagon->SetSamplerUniform("edge_cells", &*m_tex1d_grid_edge_cells);
     shader_dvr->SetSamplerUniform("edge_cells", &*m_tex1d_grid_edge_cells);
 }
 
@@ -534,7 +464,7 @@ void GCRMMesh::CreateVBOTriangleMesh()
         GLShaderRef shader = m_shaders["gcrm_triangle_mesh"];
         assert(shader);
         GLint progId = shader->getProgramId();
-        m_vao_triangle_center_id->addAttribute(progId,"in_corner_id",GL_INT, 1, sizeof(int),0,false, m_vbo_triangle_center_id);
+        m_vao_triangle_center_id->addAttribute(progId,"in_corner_id", GL_INT, 1, sizeof(int),0,false, m_vbo_triangle_center_id);
         m_vao_triangle_center_id->enable();
     }
 }
@@ -548,39 +478,26 @@ void GCRMMesh::volumeRender()
         CreateVBOTriangleMesh();
     }
 
-    /*
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(m_bgColor3f.x(), m_bgColor3f.y(), m_bgColor3f.z(), 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    */
-
-    //ConfigManagerRef config = ConfigManager::getInstance();
 
     GLShaderRef gridShader = m_shaders["gcrm_dvr"];//direct ray-casting through prism grid using my proposed method.
-    /*
-    GLShaderRef gridShader = m_shaders["gcrm_dvr_regular"];//ray-casting resampled volume data.
-    */
-   
-    //m_volumeRender->m_worldMapTextures[0]->bind();//necessary??
-    //m_volumeRender->m_worldMapTextures[1]->bind();//necessary??
-    //if (m_tex3d)
-    {
-        mat4 inv_mvm = GLContext::g_MVM;
-        inv_mvm.inverse();
-        gridShader->SetMatrixUniform("modelViewMat", GLContext::g_MVM);
-        gridShader->SetMatrixUniform("projMat", GLContext::g_PjM);
-        gridShader->SetMatrixUniform("inv_mvm", inv_mvm);
-        gridShader->SetBoolUniform("enableLight", true);
-        gridShader->SetFloat4Uniform("e_lightPos", GLContext::g_lights[0].m_pos);
-        gridShader->UseShaders();//use();
+    
+    mat4 inv_mvm = GLContext::g_MVM;
+    inv_mvm.inverse();
+    gridShader->SetMatrixUniform("modelViewMat", GLContext::g_MVM);
+    gridShader->SetMatrixUniform("projMat", GLContext::g_PjM);
+    gridShader->SetMatrixUniform("inv_mvm", inv_mvm);
+    gridShader->SetFloat4Uniform("e_lightPos", GLContext::g_lights[0].m_pos);
+    gridShader->UseShaders();
 
-        m_vao_triangle_center_id->draw();
+    m_vao_triangle_center_id->draw();
 
-        gridShader->ReleaseShader();
-    }
+    gridShader->ReleaseShader();
 
     glPopAttrib();
 }
@@ -614,9 +531,8 @@ void GCRMMesh::CreateVBOHexagonMesh()
     }
 }
 
-void GCRMMesh::RenderTriangleGridConnc(bool bFillMesh, bool bLighting)
+void GCRMMesh::RenderTriangleGridConnc()
 {
-
     glPushAttrib(GL_ENABLE_BIT);
 
     if (!m_vao_triangle_center_id)
@@ -624,19 +540,15 @@ void GCRMMesh::RenderTriangleGridConnc(bool bFillMesh, bool bLighting)
         CreateVBOTriangleMesh();
     }
 
-    /*
-    if (bFillMesh)
+    if (m_bWireframe)
     {
-        //cout << __func__ << " bFillMesh=" << bFillMesh << endl;
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    else{
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
-    */
     /*
     glDisable(GL_CULL_FACE);
     */
@@ -650,37 +562,28 @@ void GCRMMesh::RenderTriangleGridConnc(bool bFillMesh, bool bLighting)
     HostFloatArrayRef	varClimate = climateVariableFile->getFloatArray()[m_climateVariableUniqueId];
     int nLayers = (int) varClimate->m_dimsizes[2];
     m_maxIdxLayer = min(m_maxIdxLayer, nLayers-1);
-    /**comment for ODS
-    glClearColor(m_bgColor3f.x(), m_bgColor3f.y(), m_bgColor3f.z(), 1.0);//
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    */
-    GLShaderRef gridShader = m_shaders["gcrm_triangle_mesh"];//m_volumeRender->GetShader("grid_gcrm");
-    //m_volumeRender->m_worldMapTextures[0]->bind();//necessary??
-    //m_volumeRender->m_worldMapTextures[1]->bind();//necessary??
 
+    GLShaderRef gridShader = m_shaders["gcrm_triangle_mesh"];
+
+    mat4 mvm = GLContext::g_MVM;
+    mat4 prj = GLContext::g_PjM;
+    mat3 nom = GLContext::g_NM;
+    vec4f pos = GLContext::g_lights[0].m_pos;
     gridShader->SetMatrixUniform("modelViewMat", GLContext::g_MVM);
     gridShader->SetMatrixUniform("projMat", GLContext::g_PjM);
     gridShader->SetMatrixUniform("normalMat", GLContext::g_NM);
-    //gridShader->SetSamplerUniform("uWorldColorMap",&*(m_volumeRender->m_worldMapTextures[0]) );
-    //gridShader->SetSamplerUniform("uWorldAlphaMap",&*(m_volumeRender->m_worldMapTextures[1]) );
-    gridShader->SetBoolUniform("enableLight", bLighting);
+    gridShader->SetBoolUniform("enableLight", m_bLighting);
     gridShader->SetFloat4Uniform("e_lightPos", GLContext::g_lights[0].m_pos);
     gridShader->SetIntUniform("iLayers", m_maxIdxLayer);
-    gridShader->UseShaders();//use();
+    gridShader->UseShaders();
 
     m_vao_triangle_center_id->draw();
-
-    //m_volumeRender->m_worldMapTextures[0]->unbind();
-    //m_volumeRender->m_worldMapTextures[1]->unbind();
-
-    //glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_CULL_FACE);
 
     gridShader->ReleaseShader();
 
     glPopAttrib();
 }
-void GCRMMesh::RenderHexagonalGridConnc(bool bFillMesh, bool bLighting)
+void GCRMMesh::RenderHexagonalGridConnc()
 {
     glPushAttrib(GL_ENABLE_BIT);
 
@@ -688,38 +591,30 @@ void GCRMMesh::RenderHexagonalGridConnc(bool bFillMesh, bool bLighting)
     {
         CreateVBOHexagonMesh();
     }
-    //ConfigManagerRef config = ConfigManager::getInstance();
     GLShaderRef gridShader = m_shaders["gcrm_hexagon_mesh"];
-    /**Comment for ODS
-    if (bFillMesh)
+    if (m_bWireframe)
     {
-        //cout << __func__ << " bFillMesh=" << bFillMesh << endl;
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }else{
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }else{
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
-    */
 
     NetCDFFileRef climateVariableFile = (*m_netmngr)[m_climateVariableFileName];
     HostFloatArrayRef	varClimate = climateVariableFile->getFloatArray()[m_climateVariableUniqueId];
     int nLayers = (int) varClimate->m_dimsizes[2];
     m_maxIdxLayer = min(m_maxIdxLayer, nLayers - 1);
 
-    //glClearColor(m_bgColor3f.x(), m_bgColor3f.y(), m_bgColor3f.z(), 1.0);//
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     gridShader->SetMatrixUniform("modelViewMat", GLContext::g_MVM);
     gridShader->SetMatrixUniform("projMat",		 GLContext::g_PjM);
     gridShader->SetMatrixUniform("normalMat",	 GLContext::g_NM);
-    gridShader->SetBoolUniform("enableLight", bLighting);
+    gridShader->SetBoolUniform("enableLight", m_bLighting);
     gridShader->SetFloat4Uniform("e_lightPos", GLContext::g_lights[0].m_pos);
     gridShader->SetIntUniform("iLayers", m_maxIdxLayer);
-    //gridShader->SetFloatUniform("timing", m_timing);
 
-    gridShader->UseShaders();//use();
+    gridShader->UseShaders();
 
     m_vao_hexagon_center_id->draw();
 
@@ -728,213 +623,9 @@ void GCRMMesh::RenderHexagonalGridConnc(bool bFillMesh, bool bLighting)
     glPopAttrib();
 }
 
-GLVertexBufferObjectRef GCRMMesh::CreateVBOTriangle(){
-    //The geometry of the grid is upload only once.
-    cout<<"Create VBO for Visible Surface ID\n";
-    
-    NetCDFFileRef gridFile = (*m_netmngr)[m_gridSimpleFileName];
-    NetCDFFileRef climateVariableFile = (*m_netmngr)[m_climateVariableFileName];
-
-    if(!gridFile || !climateVariableFile)
-    {
-        GLError::ErrorMessage(string(__func__)+m_climateVariableFileName+"is not load!");
-    }
-    HostIntArrayRef	  varCornerCells = (*m_netmngr)[m_gridSimpleFileName]->getIntArray()["corner_cells"];
-    HostFloatArrayRef	varCenterLat = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_center_lat"];
-    HostFloatArrayRef	varCenterLon = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_center_lon"];
-    HostFloatArrayRef	varClimate = climateVariableFile->getFloatArray()[m_climateVariableUniqueId];
-    if(!varClimate || ! varCenterLat || !varCenterLon || !varCenterLon //	|| !varInterfaces || !varLayers
-        )
-    {
-        GLError::ErrorMessage(string(__func__)+string(": varCornerCells, varCenterLat, varCenterLon , varNEdgesOnCells or varClimate is NULL!"));
-    }
-
-    vec3f v[3];
-    int nCorners = (int) (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_corner_lat"]->m_dimsizes[0];
-    vector<vec3f> verticesAttributes;
-    for (int iTriangle = 0 ; iTriangle < nCorners ; ++iTriangle)
-    {
-        for (int i=0 ; i < 3 ; ++i)
-        {//get three centers of the neighborhood hexagon cells.
-            //which are the vertex of the triangle we are about to draw later.
-            int	  iCell = (*varCornerCells)[iTriangle * 3+i];
-            float lat  = (*varCenterLat)[iCell];
-            float lon  = (*varCenterLon)[iCell];
-            verticesAttributes.push_back(vec3f(lat,lon,float(iTriangle)));
-        }
-    }//end of for.
-    m_vboSurfaceTriangleVtxPosCellId = GLVertexBufferObjectRef(new GLVertexBufferObject());
-
-    m_vboSurfaceTriangleVtxPosCellId->upload(verticesAttributes.size()* sizeof(verticesAttributes[0])
-        , verticesAttributes.size(), verticesAttributes.data());
-
-    return m_vboSurfaceTriangleVtxPosCellId;
-}
-
-GLIndexBufferObjectRef GCRMMesh::CreateIBOHexagon(){
-
-    cout<<"Create VBO and IBO for hexagonal mesh geometry\n";
-    NetCDFFileRef climateVariableFile = (*m_netmngr)[m_climateVariableFileName];
-    if(!climateVariableFile)
-    {
-        GLError::ErrorMessage(string(__func__)+m_climateVariableFileName+"is not load!");
-    }
-    //m_netmngr["temperature_19010101_000000.nc"]->getFloatArray()["temperature_ifc"];
-    HostIntArrayRef   varCellCorners = (*m_netmngr)[m_gridSimpleFileName]->getIntArray()["cell_corners"];
-    HostFloatArrayRef varCornerLat   = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_corner_lat"];
-    HostFloatArrayRef varCornerLon   = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_corner_lon"];
-    if(! varCellCorners || !varCornerLat || !varCornerLon //	|| !varInterfaces || !varLayers
-        )
-    {
-        GLError::ErrorMessage(string(__func__)+string(": varCornerCells, varCenterLat, varCenterLon , varNEdgesOnCells is NULL!"));
-    }
-    
-    int nCell = (int) varCellCorners->m_dimsizes[0];
-    //vector<Vec3f_INT> vtxPosCellIdArray;
-    vector<vec3f> vtxPosCellIdArray(nCell * 6);
-    //feed vertex buffer
-    m_iboHexagon = GLIndexBufferObjectRef(new GLIndexBufferObject(GL_POLYGON));
-    m_iboHexagon->enableRestart(true);
-    m_iboHexagon->setRestartIndex(-1);
-    size_t count = 0;
-    for(int iCell=0; iCell < nCell ; ++iCell)
-    {
-        for(int i=0; i < 6 ; ++i)
-        {
-            int vtxIdx	= (*varCellCorners)[iCell*6+i];
-            float lat	= (*varCornerLat)[vtxIdx];
-            float lon	= (*varCornerLon)[vtxIdx];
-            /*
-            float x		= GLOBLE_RADIUS*cos(lat)*sin(lon);
-            float y		= GLOBLE_RADIUS*sin(lat);
-            float z		= GLOBLE_RADIUS*cos(lat)*cos(lon);
-
-            Vec3f_INT attrib;
-            attrib.position = vec3f(x,y,z);
-            attrib.cellId = iCell+1;
-            vtxPosCellIdArray.push_back(attrib);
-            */
-            vtxPosCellIdArray[count] = vec3f(lat, lon, float(iCell));
-            count++;
-            (*m_iboHexagon) << iCell*6+i;
-        }
-        (*m_iboHexagon) << -1;
-    }
-
-    m_vboSurfaceHexagonVtxPosCellId = GLVertexBufferObjectRef(new GLVertexBufferObject());
-
-    m_vboSurfaceHexagonVtxPosCellId->upload(vtxPosCellIdArray.size()*sizeof(vtxPosCellIdArray[0])
-                                     ,vtxPosCellIdArray.size(),vtxPosCellIdArray.data());
-    m_iboHexagon->enable();
-
-    return m_iboHexagon;
-   
-}
-
-GLVertexBufferObjectRef GCRMMesh::CreateVBOTrianglePos(){
-    //The geometry of the grid is upload only once.
-    cout<<"Create VBO for Triangle Surface Pos\n";
-    
-    NetCDFFileRef gridFile = (*m_netmngr)[m_gridSimpleFileName];
-    NetCDFFileRef climateVariableFile = (*m_netmngr)[m_climateVariableFileName];
-
-    if(!gridFile || !climateVariableFile)
-    {
-        GLError::ErrorMessage(string(__func__)+m_climateVariableFileName+"is not load!");
-    }
-    HostIntArrayRef	  varCornerCells = (*m_netmngr)[m_gridSimpleFileName]->getIntArray()["corner_cells"];
-    HostFloatArrayRef	varCenterLat = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_center_lat"];
-    HostFloatArrayRef	varCenterLon = (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_center_lon"];
-    HostFloatArrayRef	varClimate = climateVariableFile->getFloatArray()[m_climateVariableUniqueId];
-    if(!varClimate || ! varCenterLat || !varCenterLon || !varCenterLon //	|| !varInterfaces || !varLayers
-        )
-    {
-        GLError::ErrorMessage(string(__func__)+string(": varCornerCells, varCenterLat, varCenterLon , varNEdgesOnCells or varClimate is NULL!"));
-    }
-    //float x,y,z;
-    //vec3f v[3];
-    int nCorners = (int) (*m_netmngr)[m_gridSimpleFileName]->getFloatArray()["grid_corner_lat"]->m_dimsizes[0];
-    vector<vec2f> vtxPosArray;
-
-    float minLat = std::numeric_limits<float>::max();
-    float minLon = minLat;
-    float maxLat = std::numeric_limits<float>::lowest();
-    float maxLon = maxLat;
-    for (int iTriangle = 0 ; iTriangle < nCorners ; ++iTriangle)
-    {
-        for (int i=0 ; i < 3 ; ++i)
-        {//get three centers of the neighborhood hexagon cells.
-            //which are the vertex of the triangle we are about to draw later.
-            int	  iCell = (*varCornerCells)[iTriangle * 3+i];
-            float lat   = (*varCenterLat)[iCell];
-            float lon   = (*varCenterLon)[iCell];
-            //iLat[i] = lat;
-            //iLon[i] = lon;// < 0 ? lon+PI*2.0f : lon;//avoid wrap-up artifacts on determine the clock-wiseness of triangle.
-            minLat = std::min(minLat, lat);
-            maxLat = std::max(maxLat, lat);
-            minLon = std::min(minLon, lon);
-            maxLon = std::max(maxLon, lon);
-            vtxPosArray.push_back(vec2f(lon,lat));
-        }
-    }
-    //normalize to [0,1]x[0,1]
-    int count = (int) vtxPosArray.size();
-    vec2f inv_spanLonLat(1.0f/(maxLon-minLon), 1.0f/(maxLat-minLat));
-    vec2f minLonLat(minLon, minLat);
-    for (int i = 0 ; i < count ; i++)
-    {
-        vtxPosArray[i] = (vtxPosArray[i]-minLonLat)*inv_spanLonLat;
-    }
-    m_vboTrianglePos = GLVertexBufferObjectRef(new GLVertexBufferObject());
-
-    m_vboTrianglePos->upload(vtxPosArray.size()* sizeof(vtxPosArray[0])
-                            ,vtxPosArray.size(), vtxPosArray.data());
-
-    return m_vboTrianglePos;
-}
-
 string GCRMMesh::getUniqueVarName(const string& varFilePath, const string& varName) const
 {
     return Dir::basename(varFilePath) + "_" + varName;
-}
-
-//Convert from global time id to file id and local time step id.
-//return true if the global id hasn't reached to the end.
-/*
-bool GCRMMesh::fromGlobalTimeIdToLocalId(int gtimeId, int& iF, int &localTimeId)
-{
-    ConfigManagerRef config = ConfigManager::getInstance();
-    int nFiles = config->m_climateVaribleFilePathNames.size();
-    int timeOffset=0; int iFile=0;
-    bool bWithinRange= false;
-
-    for (iFile = 0 ; iFile < nFiles ; iFile++)
-    {
-        QString uniqueVarName = getUniqueVarName(iFile);
-        vec2i localTimeRange  = m_dataFileTimeStepCounts[uniqueVarName];
-        int nLocalTimeSteps = localTimeRange.y() - localTimeRange.x() + 1;
-
-        if (gtimeId >= timeOffset && gtimeId < timeOffset+nLocalTimeSteps)
-        {//Detect which data file array to use.
-            bWithinRange = true;
-            break;
-        }
-        timeOffset += nLocalTimeSteps;
-    }
-    if (iFile >= nFiles)
-    {
-        bWithinRange = false;
-    }
-    iF = iFile;
-    localTimeId = gtimeId - timeOffset;
-
-    return bWithinRange;
-}
-*/
-
-//triangle ID is encoded in the alpha components of vertex color in m_vboTriangleColor
-void GCRMMesh::RenderRemeshedGridWithLayers(bool bFillMesh, bool bLighting)
-{//No index buffer used. Only vertex buffer for [Vx,Vy,Vz,Nx,Ny,Nz,Id0,Id1,Id2]
 }
 
 void GCRMMesh::ReadGrid(const string& gridFilePath)//, int timeStart, int timeEnd )
@@ -962,6 +653,7 @@ void GCRMMesh::LoadClimateData(const string& varFilePath, const string& varName,
 
     m_climateVariableFileName = Dir::basename(varFilePath);
     m_climateVariableName = varName;
+    m_climateVariableUniqueId = getUniqueVarName(varFilePath, varName);
 
     NetCDFFileRef varnetcdf = (*m_netmngr)[m_climateVariableFileName];
     if (!varnetcdf)
@@ -1027,12 +719,9 @@ void GCRMMesh::LoadClimateData(const string& varFilePath, const string& varName,
             }
             break;
     }
-    //time_out = max(time_out,1);
     varnetcdf->LoadVarData(varName, uniqueVarName, timeStart, timeEnd-timeStart+1, 0, 1, true);
-    m_dataFileTimeStepCounts[uniqueVarName] = davinci::vec2i(timeStart, timeEnd);
     m_totalTimeSteps += (std::abs(timeEnd-timeStart)+1);
     m_dataType = pVarInfo->rh_type;
-   
 }
 
 void GCRMMesh::normalizeClimateDataArray(const string& varName)
@@ -1129,25 +818,77 @@ void GCRMMesh::SetMaxIdxLayer( int val )
 
 void GCRMMesh::SetStepSize(float val)
 {
-    //ConfigManagerRef config = ConfigManager::getInstance();
     GLShaderRef shader = m_shaders["gcrm_dvr"];
-    shader->SetFloatUniform("stepsize", val);
-    shader = m_shaders["gcrm_dvr_regular"];
     shader->SetFloatUniform("stepsize", val);
 }
 
-void GCRMMesh::SetLightParam(vec4f &lightParam)
+void GCRMMesh::SetMaterial(vec4f &material)
 {
     GLShaderRef shader = m_shaders["gcrm_dvr"];
-    shader->SetFloat4Uniform("lightParam", lightParam);
-
-    shader = m_shaders["gcrm_dvr_regular"];
-    shader->SetFloat4Uniform("lightParam", lightParam);
+    shader->SetFloat4Uniform("material", material);
 }
 
+void GCRMMesh::ToggleLighting(bool val)
+{
+    IMesh::ToggleLighting(val);
+
+    vector<string> shaderNames({
+        "gcrm_triangle_mesh", "gcrm_hexagon_mesh", "gcrm_dvr"
+    });
+    std::for_each(shaderNames.begin(), shaderNames.end(), [&](const string& name){
+        GLShaderRef shader = m_shaders[name];
+        if (shader){
+            shader->SetBoolUniform("enableLight", val);
+        }else{
+            cerr << "Shader " << name << " is not created!\n";
+            exit(1);
+        }
+    });
+}
+
+void GCRMMesh::SetLight(davinci::GLLights light)
+{
+    vector<string> shaderNames({
+        "gcrm_triangle_mesh", "gcrm_hexagon_mesh", "gcrm_dvr"
+    });
+    std::for_each(shaderNames.begin(), shaderNames.end(), [&](const string& name){
+        GLShaderRef shader = m_shaders[name];
+        if (shader){
+            shader->SetFloat4Uniform("e_lightPos", GLContext::g_lights[0].m_pos);
+        }else{
+            cerr << "Shader " << name << " is not created!\n";
+            exit(1);
+        }
+    });
+}
+
+void GCRMMesh::ToggleWireframe(bool v)
+{
+    IMesh::ToggleWireframe(v);
+
+    if (m_meshType == "hexagon")
+    {
+        string shaderName = "gcrm_hexagon_mesh";
+        GLShaderRef shader = m_shaders[shaderName];
+        if (m_bWireframe)
+        {
+            cout << "switch to hexagon wireframe mesh shader\n";
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glShadeModel(GL_SMOOTH);
+            glEnable(GL_DEPTH_TEST);
+            shader->loadGeomShaderFile(m_shaderConfig[shaderName]["geometry_shader_frame"]);// qPrintable(config->m_shaderFiles[7]));//frame
+        }else{
+            cout << "switch to hexagon solid mesh shader\n";
+            shader->loadGeomShaderFile(m_shaderConfig[shaderName]["geometry_shader_fill"]);// qPrintable(config->m_shaderFiles[8]));//solid fill
+        }
+        shader->CreateShaders();
+    }
+}
+
+
 bool isCCW(vec3f v0, vec3f v1, vec3f v2){
-    vec3f v1_0 = v1 - v0;//vec3f(iLon[1],iLat[1],0)-vec3f(iLon[0],iLat[0],0);
-    vec3f v2_0 = v2 - v0;//vec3f(iLon[2],iLat[2],0)-vec3f(iLon[0],iLat[0],0);
+    vec3f v1_0 = v1 - v0;
+    vec3f v2_0 = v2 - v0;
     if (abs(v1_0.x())>PI)
     {
         v0[0] = v0[0] < 0 ? v0[0]+PI*2.0f : v0[0];

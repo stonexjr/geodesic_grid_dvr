@@ -1,3 +1,25 @@
+/*
+Copyright (c) 2013-2017 Jinrong Xie (jrxie at ucdavis dot edu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "netcdf_read.h"
 #include <time.h>
 #include <assert.h>
@@ -86,7 +108,6 @@ int NetCDF::load_header()
     status = nc_inq(m_ncid, &m_ndims, &m_nvars, &ngatts, &unlimdimid);
     if (status != NC_NOERR) ERR(status);
 
-    //char out_filename[MAX_PATH];
     char* var_name = new char[NC_MAX_NAME];
 
     for(int i=0; i < m_ndims; i++) {
@@ -115,9 +136,6 @@ int NetCDF::load_header()
             &(m_var_arr[i]->rh_natts));
         if (status != NC_NOERR) ERR(status);
 
-        // TODO: this code needs to be places into a separate function
-        // it can be used as a filter later on.
-        cout<<m_var_arr[i]->var_name<<endl;
         m_Nd_var[m_var_arr[i]->var_name] = i;
         m_Nd_var_num++;
 
@@ -141,7 +159,6 @@ int NetCDF::load_header()
         }
         if(m_var_arr[i]->total_size == 1)
             m_var_arr[i]->total_size = 0;
-        //status = read_var(m_var_arr[i]);
 
         //process some attributes
         /* find out how much space is needed for attribute values */
@@ -311,8 +328,6 @@ int NetCDF::get_vardata_impl(NetCDF_var *var,
 
     if (rh_ndims == 0) total_size = 0;
 
-    //cerr << "Get the variable : " << var_name << " size: " << total_size << " dimensions " << rh_ndims << endl;
-
     switch (rh_type){
     case NC_FLOAT:
         if ((status = nc_get_vara_float(m_ncid, temp_varid, start,
@@ -320,7 +335,6 @@ int NetCDF::get_vardata_impl(NetCDF_var *var,
             ERR(status);
         break;
     case NC_DOUBLE:
-        //*count = 1;
         if ((status = nc_get_vara_double(m_ncid, temp_varid, start,
             count, reinterpret_cast<double *>(*data))))
             ERR(status);
@@ -343,7 +357,5 @@ int NetCDF::get_vardata_impl(NetCDF_var *var,
     default:
         break;
     }
-    // end switch
-
     return status;
 }

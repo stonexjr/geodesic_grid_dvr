@@ -34,9 +34,6 @@ SET(UTILITY_SOURCE
 SOURCE_GROUP("utility" FILES ${UTILITY_HEADER} ${UTILITY_SOURCE})
 
 SET(SHADER_SOURCE
-    ${SRC_DIR}/shader/grid_gcrm.vert
-    ${SRC_DIR}/shader/grid_gcrm.geom
-    ${SRC_DIR}/shader/grid_gcrm.frag
     ${SRC_DIR}/shader/gcrm_triangle_mesh.vert
     ${SRC_DIR}/shader/gcrm_triangle_mesh.geom
     ${SRC_DIR}/shader/gcrm_triangle_mesh.frag
@@ -156,6 +153,7 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
    "${SRC_DIR}/shader" "${PROJECT_BINARY_DIR}/\$\(CONFIGURATION\)/shader")
 
 #Copy TF file
+#[[
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy_directory
    "${SRC_DIR}/../config" "${PROJECT_BINARY_DIR}/config")
@@ -163,3 +161,4 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy_directory
    "${SRC_DIR}/../config" "${PROJECT_BINARY_DIR}/\$\(CONFIGURATION\)/config")
+]]

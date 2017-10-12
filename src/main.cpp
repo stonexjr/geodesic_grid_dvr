@@ -1,5 +1,31 @@
-//This tutorial demonstrates how to quick prototype an OpenGL app using freeglut
-// 
+/*
+Copyright (c) 2013-2017 Jinrong Xie (jrxie at ucdavis dot edu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+//This sample demonstrates how to volume render geodesic grid using the analytic approach
+//introduced in the paper "Interactive Ray Casting of Geodesic Grids", doi: 10.1111/cgf.12135
+//along with hexagon/triangle mesh visualization with a predefined color map stored in config/tf.vtf
+//User is highly recommended to enhance this sample with an interactive transfer function editor
+//to adjust the color map on-the-fly.
+
 #if defined(__APPLE__) || defined(MACOSX)
 #include <gl.h>
 #include <gl3.h>
@@ -11,6 +37,7 @@
 #include <GL/freeglut.h>
 #include <mat4.h>
 #include <utility.h>
+#include <GLContext.h>
 #include <GLTexture1D.h>
 #include "Dir.h"
 #include "GCRMMesh.h"
@@ -60,6 +87,16 @@ IMeshRef m_mesh;
 davinci::mat4 mvm;
 davinci::mat4 prjMtx;
 
+//UI toggles
+struct UIToggle
+{
+    bool bDrawVolume = true;
+    bool bDrawMesh = false;
+    bool bWireframe = true;
+    bool bEnableLighting = false;
+    float fStepSize = 0.001f;
+    string meshType = "triangle";// "hexagon"
+}ui;
 
 void display();
 
@@ -69,13 +106,12 @@ void loadData(){
     }
     int timeStart = 0, timeEnd = 1;
     m_mesh->ReadGrid(gridFilePath);
-    m_mesh->SetDrawMeshType("hexagon");
+    m_mesh->SetMeshType("hexagon");
     //load data value.
     cout << "Load data " << dataVarName << " from data file" << dataFilePath << endl;
 
     m_mesh->LoadClimateData(dataFilePath, dataVarName, 0, 0);
     m_mesh->normalizeClimateDataArray(dataVarName);
-    //m_mesh->SetCurrentGlobalTimeSliceId(0);
 
     m_mesh->Remesh();
     m_mesh->SetDataNew(true);
@@ -104,6 +140,14 @@ void loadTF(){
     davinci::GLError::glCheckError("loadTF():create transfer function texture failed!");
 
     m_mesh->glslSetTransferFunc(tfTex1D);
+    m_mesh->SetMeshType(ui.meshType);
+    davinci::GLError::glCheckError("glslSetTransferFunc(): failed!");
+    //initialize one white light default at the origin of camera space.
+    davinci::GLContext::g_lights.push_back(davinci::GLLights());
+    m_mesh->SetMaterial(davinci::vec4f(0.5f/*Kamb*/, 0.83f/*Kdif*/, 0.89f/*Kspe*/, 20.0f/*Kshi*/));
+    m_mesh->SetStepSize(ui.fStepSize);
+    m_mesh->ToggleLighting(ui.bEnableLighting);
+    m_mesh->SetLight(davinci::GLContext::g_lights[0]);
 }
 
 void keyboard(unsigned char key, int x, int y){
@@ -112,31 +156,71 @@ void keyboard(unsigned char key, int x, int y){
         case 'w':
             printf("W key pressed!\n");
             zTranslate += 0.1f;
+            printf("zTranslate:%f\n",zTranslate);
             break;
         case 's':
             printf("S key pressed!\n");
             zTranslate -= 0.1f;
+            printf("zTranslate:%f\n",zTranslate);
             break;
         case 'd':
             printf("d key pressed!\n");
             xTranslate -= 0.1f;
+            printf("xTranslate:%f\n",xTranslate);
             break;
         case 'a':
             printf("a key pressed!\n");
             xTranslate += 0.1f;
+            printf("xTranslate:%f\n",xTranslate);
             break;
         case ' ':
             printf("space key pressed!\n");
             yTranslate -= 0.1f;
+            printf("yTranslate:%f\n",yTranslate);
             break;
         case 'z':
-            printf("z key pressed!\n");
             yTranslate += 0.1f;
+            printf("yTranslate:%f\n",yTranslate);
+            break;
+        case 'v'://toggle btw. volume rendering and mesh rasterization
+            printf("v key pressed!\n");
+            ui.bDrawVolume = !ui.bDrawVolume;
+            ui.bDrawMesh = !ui.bDrawVolume;
+            printf("%s volume rendering.\n", (!ui.bDrawVolume? "Enable":"Disable"));
+            break;
+        case 'h'://toggle btw. hexagon and triangle
+            printf("h key pressed!\n");
+            ui.meshType = (ui.meshType == "triangle" ? "hexagon" : "triangle");
+            printf("mesh type: %s.\n", ui.meshType.data());
+            m_mesh->SetMeshType(ui.meshType);
+            break;
+        case 'f'://toggle btw. wireframe and solid
+            printf("f key pressed!\n");
+            ui.bWireframe = !ui.bWireframe;
+            printf("%s wireframe .\n", (!ui.bWireframe ? "Enable":"Disable"));
+            m_mesh->ToggleWireframe(ui.bWireframe);
+            break;
+        case 'l'://toggle lighting applied to both volume rendering and rasterization
+            ui.bEnableLighting = !ui.bEnableLighting;
+            printf("%s lighting.\n", (ui.bEnableLighting ? "Enable":"Disable"));
+            m_mesh->ToggleLighting(ui.bEnableLighting);
+            break;
+        case '+'://increase raycasting stepsize
+            ui.fStepSize += 0.001f;
+            printf("stepsize=%f\n",ui.fStepSize);
+            m_mesh->SetStepSize(ui.fStepSize);
+            break;
+        case '-'://decrease raycasting stepsize
+            ui.fStepSize -= 0.001f;
+            ui.fStepSize = std::max(0.001f, ui.fStepSize);
+            printf("stepsize=%f\n",ui.fStepSize);
+            m_mesh->SetStepSize(ui.fStepSize);
             break;
         case(27) :
             printf("ESC key pressed!\n");
             exit(0);
     }
+    needUpdate = true;
     display();
 }
 
@@ -184,15 +268,12 @@ void mouseButton(int button, int state, int x , int y){
 
 void mouseWheel(int button, int dir, int x, int y){
     double factor = 0.9;
-    if (dir > 0)
-    {
-        // Zoom in
-        scale /= factor;
-    }
-    else
-    {
+    if (dir > 0){
         // Zoom out
         scale *= factor;
+    }else{
+        // Zoom in
+        scale /= factor;
     }
     cout << "scale=" << scale << endl;
 
@@ -216,8 +297,9 @@ bool initGL(){
     loadTF();
 
     glClearColor(0,0,0,1.0);
-
     glViewport(0,0,window_width, window_height);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
 
     needUpdate = true;
     return true;
@@ -231,12 +313,24 @@ void reshape(int w, int h){
     //gluPerspective(80.0f, (float)w/h, 0.1, 100);
     prjMtx = davinci::mat4::createPerpProjMatrix(80.0f, (float)w / h, 0.1, 100);
     glLoadTransposeMatrixf(prjMtx.get());
+    davinci::GLContext::g_PjM = prjMtx;
+}
+
+void renderMesh(){
+    davinci::GLContext::g_MVM = mvm;
+    davinci::GLContext::g_NM = mvm.getNormalMatrix();
+    if (ui.bDrawMesh){
+        m_mesh->RenderGrid();
+    }
+    if (ui.bDrawVolume){
+        m_mesh->volumeRender();
+    }
 }
 
 void display(){
     if (needUpdate){//only refresh when it's necessary.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+
         glMatrixMode(GL_MODELVIEW);
         mvm.identity();
         mvm.rotateYd(yRotate);
@@ -247,7 +341,8 @@ void display(){
 
         glLoadTransposeMatrixf(mvm.get());
 
-        glutWireCube(2);
+        glutWireCube(2);//for debug and sanity check of transformation matrix
+        renderMesh();
 
         glutSwapBuffers();
         glutPostRedisplay();

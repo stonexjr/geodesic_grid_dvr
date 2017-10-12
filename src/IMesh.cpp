@@ -1,3 +1,25 @@
+/*
+Copyright (c) 2013-2017 Jinrong Xie (jrxie at ucdavis dot edu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "IMesh.h"
 #include "GLTexture1D.h"
 #include "GLError.h"
@@ -10,9 +32,9 @@ char* IMesh::m_interpName[3]={"Prism", "Tetra", "MVI"};
 
 IMesh::IMesh(void)
     :m_netmngr(new NetCDFManager()),m_gridSimpleFileName(""),
-    m_bFillMesh(false),m_isDataNew(true),
+    m_bWireframe(true),m_isDataNew(true),
     m_timeGlobal(0),m_curFileStep(0),m_curLocalTimeStep(0),
-    m_totalTimeSteps(0), m_timing(0.0f)
+    m_totalTimeSteps(0), m_bLighting(true)
 {
 }
 
@@ -141,59 +163,3 @@ void IMesh::LoadGridVar(const string& gridFileName,const vector<string>& varName
         netcdf->LoadVarData(varName, varName, 0, 1, 0, 1, true);
     });
 }
-
-
-davinci::GLTextureAbstract* IMesh::RenderMeshTo3DTexture( int width, int height )
-{
-    throw std::exception("IMesh::RenderMeshTo3DTexture() not yet implemented!");
-}
-
-void IMesh::setInVisibleCellId(int m_maxNcells)
-{
-    throw std::logic_error("The method or operation is not implemented.");
-}
-
-void IMesh::SetTiming(float timing)
-{
-    throw std::logic_error("The method or operation is not implemented.");
-}
-
-void IMesh::volumeRender()
-{
-    throw std::logic_error("The method or operation is not implemented.");
-}
-
-void IMesh::SetStepSize(float val)
-{
-    throw std::exception("The method or operation is not implemented.");
-}
-
-void IMesh::SetLightParam(davinci::vec4f &lightParam) 
-{
-    throw std::logic_error("The method or operation is not implemented.");
-}
-
-void IMesh::SetSplitRange(davinci::vec2f range)
-{
-    throw std::logic_error("The method or operation is not implemented.");
-}
-
-/*
-uint IMesh::GetCellIdTexId()
-{
-    D_ABORT("The method or operation is not implemented.", DERROR_ERR_FUN_INVALID);
-}
-
-uint IMesh::GetPixelPositionTexId()
-{
-    D_ABORT("The method or operation is not implemented.", DERROR_ERR_FUN_INVALID);
-}
-*/
-
-/*
-void IMesh::cuSetClipeRect( const RectInt2D& m_clipeRect )
-{
-    D_ABORT("The method or operation is not implemented.", DERROR_ERR_FUN_INVALID);
-}
-*/
-
