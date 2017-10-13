@@ -190,7 +190,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE} ${UTILITY_HEADER} ${UTILITY_S
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 
-#Copy shader files
+#Copy shader files to where executable is
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy_directory
    "${SRC_DIR}/shader" "${PROJECT_BINARY_DIR}/shader")
@@ -201,7 +201,7 @@ IF(WIN32)
        "${SRC_DIR}/shader" "${PROJECT_BINARY_DIR}/\$\(CONFIGURATION\)/shader")
 ENDIF()
 
-#Copy TF file
+#Copy TF file to where executable is
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy_directory
    "${SRC_DIR}/../config" "${PROJECT_BINARY_DIR}/config")
@@ -211,3 +211,8 @@ IF(WIN32)
        COMMAND ${CMAKE_COMMAND} -E copy_directory
        "${SRC_DIR}/../config" "${PROJECT_BINARY_DIR}/\$\(CONFIGURATION\)/config")
 ENDIF()
+
+#Copy test data to where executable is
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+   "${SRC_DIR}/../data" "${PROJECT_BINARY_DIR}/data")

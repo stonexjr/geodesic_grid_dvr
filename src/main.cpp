@@ -54,9 +54,10 @@ float xTranslate = 0, yTranslate = 0, zTranslate = -5.0f;
 float scale = 1.0f;
 bool needUpdate = true;
 
-string gridFilePath = "C:/fusion/gcrm_220km/grid.nc";
-string dataFilePath = "C:/fusion/gcrm_220km/vorticity_19010115_000000.nc";
+string gridFilePath = "./data/gcrm_220km/grid.nc";
+string dataFilePath = "./data/gcrm_220km/vorticity_19010115_000000.nc";
 string dataVarName  = "vorticity";
+
 string tfFilePath = "./config/tf.vtf";
 int tfResolution = 2048;
 
