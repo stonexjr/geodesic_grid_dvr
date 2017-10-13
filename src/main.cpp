@@ -393,5 +393,7 @@ void printHelper(){
         << " key 'a': move camera to the left\n"
         << " key 'd': move camera to the right\n"
         << " key ' ': move camera upward\n"
-        << " key 'z': move camera downward\n";
+        << " key 'z': move camera downward\n"
+        << " mouse dragging: rotate object\n"
+        << " mouse wheel: scale object\n";
 }
