@@ -90,8 +90,8 @@ davinci::mat4 prjMtx;
 //UI toggles
 struct UIToggle
 {
-    bool bDrawVolume = true;
-    bool bDrawMesh = false;
+    bool bDrawVolume = false;
+    bool bDrawMesh = true;
     bool bWireframe = true;
     bool bEnableLighting = false;
     float fStepSize = 0.001f;
@@ -317,6 +317,7 @@ void reshape(int w, int h){
     prjMtx = davinci::mat4::createPerpProjMatrix(80.0f, (float)w / h, 0.1, 100);
     glLoadTransposeMatrixf(prjMtx.get());
     davinci::GLContext::g_PjM = prjMtx;
+    needUpdate = true;
 }
 
 void renderMesh(){
@@ -344,7 +345,7 @@ void display(){
 
         glLoadTransposeMatrixf(mvm.get());
 
-        glutWireCube(2);//for debug and sanity check of transformation matrix
+        //glutWireCube(2);//for debug and sanity check of transformation matrix
         renderMesh();
 
         glutSwapBuffers();
