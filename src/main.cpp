@@ -99,6 +99,7 @@ struct UIToggle
 }ui;
 
 void display();
+void printHelper();
 
 void loadData(){
     if (!m_mesh){
@@ -301,6 +302,8 @@ bool initGL(){
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
 
+    printHelper();
+
     needUpdate = true;
     return true;
 }
@@ -375,4 +378,19 @@ int main(int argc, char** argv)
     glutMainLoop();
 
     return 0;
+}
+
+void printHelper(){
+    cout << " key 'v': toggle between volume rendering and mesh visualization\n"
+        << " key 'h': toggle between hexagon and dual-triangular mesh visualization\n"
+        << " key 'f': toggle between solid and wire frame mesh\n"
+        << " key 'l': toggle between enabling and disabling lighting for both volume render and mesh visualization\n"
+        << " key '+': increase raycasting stepsize (higher frame rate)\n"
+        << " key '-': decrease raycasting stepsize (better quality)\n"
+        << " key 'w': move camera forward\n"
+        << " key 's': move camera backward\n"
+        << " key 'a': move camera to the left\n"
+        << " key 'd': move camera to the right\n"
+        << " key ' ': move camera upward\n"
+        << " key 'z': move camera downward\n";
 }
