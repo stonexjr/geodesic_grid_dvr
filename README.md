@@ -40,7 +40,7 @@ Under Mac OS X these dependencies can be installed using
 ## Compiling GeodesicGridDVR
 Building from the source code through CMake is easy:
 
-### 1.Create a build directory, and go into it
+### 1. Create a build directory
 ```
         mkdir geodesic_grid_dvr/build
         cd geodesic_grid_dvr/build
@@ -73,7 +73,7 @@ on Linux:
 Type `cmake --help` for more options.
 
 ### 2.2 Build through CMake GUI  
-Beside CLI tool, CMake also provides an user friendly GUI to configure your build.
+Besides CLI tool, CMake also provides an user friendly GUI to configure your build.
 The following screen shot is an example of how to run and configure the cmake through its GUI on Windows machine.
 ![CMakeGUI](/resource/cmake-gui-win.PNG?raw=true "Screen shot of cmake gui")
 In case CMake cannot find the aforementioned dependencies, you can manually specify the root of the installation of each library on the UI just like you can define the cmake variable through its CLI in step 2.1.
