@@ -1,17 +1,15 @@
 # GeodesicGridDVR Overview
 GeodesicGridDVR is an open source, GPU based high-performance direct volume rendering of [spherical geodesic grid](https://en.wikipedia.org/wiki/Geodesic_grid).
 The GeodesicGridDVR core rendering code is based on OpenGL GLSL, and runs on anything from laptop, to workstations.
-The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids]
-(http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf)
+The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf).
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_overview.jpg" width="256">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_zoomin.jpg?raw=true" width="256">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_dvr.PNG?raw=true" width="256">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh.PNG?raw=true" width="200">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh.PNG?raw=true" width="200">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh_solid.PNG?raw=true" width="200">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh_solid.PNG?raw=true" width="200">
 
-<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh.PNG?raw=true" width="256">
-<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh.PNG?raw=true" width="256">
-<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh.PNG?raw=true" width="256">
-
-![gcrm_28km_dvr_vorticiy_overview](https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_overview.jpg?raw=true)
 
 # Support and Contact
 GeodesicGridDVR is under active development. It uses cmake for cross-platform build. We do our best to guarantee stable release versions. However, a certain number of bugs, as-yet-missing features, inconsistencies, or any other issues are still possible.
