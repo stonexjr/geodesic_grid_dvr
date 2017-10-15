@@ -116,22 +116,47 @@ or add them to the environment variable `Path` for Windows machine
 This application provides direct volume rendering of scientific simulation data based on spherical geodesic grid. It also visualizes the structure either as hexagon or its dual triangular mesh.  
 Here is a list of keyboard mapping
 ```
-" key 'v': toggle between volume rendering and mesh visualization"  
-" key 'h': toggle between hexagon and dual-triangular mesh visualization"
-" key 'f': toggle between solid and wire frame mesh"
-" key 'l': toggle between enabling and disabling lighting for both volume render and mesh visualization"
-" key '+': increase raycasting stepsize (higher frame rate)"
-" key '-': decrease raycasting stepsize (better quality)"
-" key 'w': move camera forward"
-" key 's': move camera backward"
-" key 'a': move camera to the left"
-" key 'd': move camera to the right"
-" key ' ': move camera upward"
-" key 'z': move camera downward"
-" mouse dragging: rotate object"
-" mouse wheel: scale object"
+key 'v': toggle between volume rendering and mesh visualization  
+key 'h': toggle between hexagon and dual-triangular mesh visualization
+key 'f': toggle between solid and wire frame mesh
+key 'l': toggle between enabling and disabling lighting for both volume render and mesh visualization
+key '+': increase raycasting stepsize (higher frame rate)
+key '-': decrease raycasting stepsize (better quality)
+key 'w': move camera forward
+key 's': move camera backward
+key 'a': move camera to the left
+key 'd': move camera to the right
+key ' ': move camera upward
+key 'z': move camera downward
+mouse dragging: rotate object
+mouse wheel: scale object
 ```
+# Acknowledgments
+This work was made possible by the support of the ViDi lab at University of California Davis.  
+Data courtesy of Karen Schuchardt at Pacific Northwest NationalLaboratory.
 
+# Citations and Reuse
+Diagrams and text are licensed under Creative Commons Attribution [CC-BY 2.0](https://creativecommons.org/licenses/by/2.0/), unless noted otherwise, with the [source available on GitHub](https://github.com/stonexjr/geodesic_grid_dvr).
+
+For attribution in academic contexts, please cite this work as
+```
+J. Xie, H. Yu, and K.-L. Ma. Interactive ray casting of geodesic grids.
+In Proceedings of the 15th Eurographics Conference on Visualization,
+EuroVis ’13, pages 481–490, 2013
+```
+BibTeX citation
+```
+@inproceedings{xie2013interactive,
+  title={Interactive ray casting of geodesic grids},
+  author={Xie, Jinrong and Yu, Hongfeng and Ma, Kwan-Liu},
+  booktitle={Computer Graphics Forum},
+  volume={32},
+  number={3pt4},
+  pages={481--490},
+  year={2013},
+  organization={Wiley Online Library}
+}
+```
 # License
 MIT
 
