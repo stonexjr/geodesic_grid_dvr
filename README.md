@@ -102,7 +102,7 @@ or else export their path to LD_LIRARY_PATH on linux machine
 ```
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:path/to/*.so"
 ```
-or add them to the environment variable `Path` for Window machine
+or add them to the environment variable `Path` for Windows machine
 
 # License
 MIT
