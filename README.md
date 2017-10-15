@@ -133,11 +133,9 @@ mouse wheel: scale object
 ```
 # Acknowledgments
 This work was made possible by the support of the ViDi lab at University of California Davis.  
-Data courtesy of Karen Schuchardt at Pacific Northwest NationalLaboratory.
+Data courtesy of Karen Schuchardt at Pacific Northwest National Laboratory.
 
 # Citations and Reuse
-Diagrams and text are licensed under Creative Commons Attribution [CC-BY 2.0](https://creativecommons.org/licenses/by/2.0/), unless noted otherwise, with the [source available on GitHub](https://github.com/stonexjr/geodesic_grid_dvr).
-
 For attribution in academic contexts, please cite this work as
 ```
 J. Xie, H. Yu, and K.-L. Ma. Interactive ray casting of geodesic grids.
@@ -158,5 +156,6 @@ BibTeX citation
 }
 ```
 # License
-MIT
+The [source available on GitHub](https://github.com/stonexjr/geodesic_grid_dvr) is under MIT license.
+Images used in the repository are licensed under Creative Commons Attribution [CC-BY 2.0](https://creativecommons.org/licenses/by/2.0/) unless noted otherwise. Some figures that have been reused from other sources don't fall under this license.
 
