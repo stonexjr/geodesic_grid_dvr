@@ -1,8 +1,7 @@
 # GeodesicGridDVR Overview
 GeodesicGridDVR is an open source, GPU based high-performance direct volume rendering of [spherical geodesic grid](https://en.wikipedia.org/wiki/Geodesic_grid).
 The GeodesicGridDVR core rendering code is based on OpenGL GLSL, and runs on anything from laptop, to workstations.
-The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf)
-
+The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf).
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_overview.jpg" width="256">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_zoomin.jpg?raw=true" width="256">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_dvr.PNG?raw=true" width="256">
