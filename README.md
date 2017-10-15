@@ -75,6 +75,7 @@ Type `cmake --help` for more options.
 ### 2.2 Build through CMake GUI  
 Beside CLI tool, CMake also provides an user friendly GUI to configure your build.
 The following screen shot is an example of how to run and configure the cmake through its GUI on Windows machine.
+![CMakeGUI](/resource/cmake-gui-win.PNG?raw=true "Screen shot of cmake gui")
 In case CMake cannot find the aforementioned dependencies, you can manually specify the root of the installation of each library on the UI just like you can define the cmake variable through its CLI in step 2.1.
 Once the pathes are correctly set, hit `Configure`. If this is your first time to configure the project, you will be prompted to select appropriate `generator` for this project.
 Click `Generate` to create makefile or Visual Studio sln file based on your selection in the last step.
