@@ -40,7 +40,7 @@ Under Mac OS X these dependencies can be installed using
 ## Compiling GeodesicGridDVR
 Building from the source code through CMake is easy:
 
-### 1.Create a build directory, and go into it
+### 1. Create a build directory
 ```
         mkdir geodesic_grid_dvr/build
         cd geodesic_grid_dvr/build
