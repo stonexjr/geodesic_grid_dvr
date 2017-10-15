@@ -1,7 +1,17 @@
 # GeodesicGridDVR Overview
-GeodesicGridDVR is an open source, GPU based high-performance direct volume rendering of spherical geodesic grid
-GeodesicGridDVR core rendering code is based on OpenGL GLSL, and runs on anything from laptop, to workstations.
-The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf)
+GeodesicGridDVR is an open source, GPU based high-performance direct volume rendering of [spherical geodesic grid](https://en.wikipedia.org/wiki/Geodesic_grid).
+The GeodesicGridDVR core rendering code is based on OpenGL GLSL, and runs on anything from laptop, to workstations.
+The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids]
+(http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf)
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_overview.jpg" width="256">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_zoomin.jpg?raw=true" width="256">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_dvr.PNG?raw=true" width="256">
+
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh.PNG?raw=true" width="256">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh.PNG?raw=true" width="256">
+<img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh.PNG?raw=true" width="256">
+
+![gcrm_28km_dvr_vorticiy_overview](https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_28km_dvr_vorticiy_overview.jpg?raw=true)
 
 # Support and Contact
 GeodesicGridDVR is under active development. It uses cmake for cross-platform build. We do our best to guarantee stable release versions. However, a certain number of bugs, as-yet-missing features, inconsistencies, or any other issues are still possible.
@@ -103,6 +113,26 @@ or else export their path to LD_LIRARY_PATH on linux machine
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:path/to/*.so"
 ```
 or add them to the environment variable `Path` for Windows machine
+
+# Functions and Controls
+This application provides direct volume rendering of scientific simulation data based on spherical geodesic grid. It also visualizes the structure either as hexagon or its dual triangular mesh.  
+Here is a list of keyboard mapping
+```
+" key 'v': toggle between volume rendering and mesh visualization"  
+" key 'h': toggle between hexagon and dual-triangular mesh visualization"
+" key 'f': toggle between solid and wire frame mesh"
+" key 'l': toggle between enabling and disabling lighting for both volume render and mesh visualization"
+" key '+': increase raycasting stepsize (higher frame rate)"
+" key '-': decrease raycasting stepsize (better quality)"
+" key 'w': move camera forward"
+" key 's': move camera backward"
+" key 'a': move camera to the left"
+" key 'd': move camera to the right"
+" key ' ': move camera upward"
+" key 'z': move camera downward"
+" mouse dragging: rotate object"
+" mouse wheel: scale object"
+```
 
 # License
 MIT
