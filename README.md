@@ -41,9 +41,16 @@ Type the following to install the dependencies using `apt-get`:
     sudo apt-get install cmake-curses-gui
 
 Under Mac OS X these dependencies can be installed using
-[MacPorts](http://www.macports.org/):
+[HomeBrew](https://brew.sh/):
 
-    sudo port install cmake
+    brew cask install cmake (note that `brew install cmake` only includes the CLI version)
+    brew install glew
+    brew install freeglut
+    brew tap homebrew/science
+    brew install netcdf
+    brew install cdo
+    brew install nco
+    brew install ncview
 
 ## Compiling GeodesicGridDVR
 Building from the source code through CMake is easy:
