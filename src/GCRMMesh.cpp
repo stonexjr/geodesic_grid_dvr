@@ -20,15 +20,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <GL/glew.h>
 #include "GCRMMesh.h"
-#include "GL/glew.h"
-//#include "GL/glut.h"
 #include <chrono>
 #include <numeric>
 #include <map>
-//#include <QGLWidget>
 #include <vec3i.h>
-//#include "util.h"
 #include "GLError.h"
 #include <GLUtilities.h>
 #include "GLError.h"
@@ -38,18 +35,11 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Dir.h"
 #include "HostArrayTemplate.h"
 
-#define MAIN_GPU_ID 0
 using namespace davinci;
-
-struct Vec3f_INT{
-    davinci::vec3f position;
-    int  cellId;
-};
 
 GCRMMesh::GCRMMesh(void):
     IMesh(),m_maxIdxLayer(0)
 {
-    //m_gridType = GCRMMESH;
     SetMeshType("triangle");
     davinci::GLError::glCheckError(__func__);
 }

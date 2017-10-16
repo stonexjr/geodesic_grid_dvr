@@ -2,6 +2,24 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.3 FATAL_ERROR)
 
 PROJECT(geodesic_grid_dvr)
 
+#Enable C++11 on Linux
+if(${UNIX})
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    elseif(COMPILER_SUPPORTS_CXX0X)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
+    endif()
+    # Qt5 require the source code is compiled with -fPIC
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif()
+
 SET(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 SET(HEADER ${SRC_DIR}/dir.h)
 SET(SOURCE ${SRC_DIR}/main.cpp
@@ -119,14 +137,15 @@ ELSE()
         "Please specify freeglut installation directory")
     SET(FREEGLUT_INCLUDE_DIRS "${FREEGLUT_ROOT_DIR}/include")
     SET(FREEGLUT_LIB_DIR "${FREEGLUT_ROOT_DIR}/lib")
-    SET(FREEGLUT_LIBRARIES "freeglut")
-    IF(WIN32)
-        SET(FREEGLUT_LIB_DIR2 "${FREEGLUT_LIB_DIR}/${PLATFORM_NAME}")
-    ENDIF()
     MESSAGE("freeglut root dir FREEGLUT_ROOT_DIR is set to: ${FREEGLUT_ROOT_DIR}")
     MESSAGE("freeglut possible lib dir: ${FREEGLUT_LIB_DIR}")
-    MESSAGE("freeglut possible lib dir: ${FREEGLUT_LIB_DIR2}")
-    MESSAGE("freeglut bin dir: ${FREEGLUT_BIN_DIR}")
+    IF(WIN32)
+        SET(FREEGLUT_LIB_DIR2 "${FREEGLUT_LIB_DIR}/${PLATFORM_NAME}")
+        SET(FREEGLUT_LIBRARIES "freeglut")
+    ELSE()
+        SET(FREEGLUT_LIBRARIES "glut")
+    ENDIF()
+#    MESSAGE("freeglut bin dir: ${FREEGLUT_BIN_DIR}")
 ENDIF()
 
 SET(INCS ${INCS} ${FREEGLUT_INCLUDE_DIRS})
@@ -145,11 +164,13 @@ ELSE()
         "Please specify NETCDF installation directory")
     SET(NETCDF_INCLUDE_DIRS "${NETCDF_ROOT_DIR}/include")
     SET(NETCDF_LIB_DIR "${NETCDF_ROOT_DIR}/lib")
-    SET(NETCDF_LIB_DIR2 "${NETCDF_LIB_DIR}/${PLATFORM_NAME}")
     SET(NETCDF_LIBRARIES "netcdf")
     MESSAGE("NETCDF root dir NETCDF_ROOT_DIR is set to: ${NETCDF_ROOT_DIR}")
     MESSAGE("NETCDF possible lib dir: ${NETCDF_LIB_DIR}")
-    MESSAGE("NETCDF possible lib dir: ${NETCDF_LIB_DIR2}")
+    IF(WIN32)
+        SET(NETCDF_LIB_DIR2 "${NETCDF_LIB_DIR}/${PLATFORM_NAME}")
+        MESSAGE("NETCDF possible lib dir: ${NETCDF_LIB_DIR2}")
+    ENDIF()
 ENDIF()
 
 SET(INCS ${INCS} ${NETCDF_INCLUDE_DIRS})
@@ -191,11 +212,15 @@ ${NETCDF_LIB_DIR}
 ${NETCDF_LIB_DIR2}
 ${DAVINCI_LIB_DIR}
 ${DAVINCI_LIB_DIR2}
+"/usr/local/lib/"
 )
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${HEADER} ${SOURCE} ${UTILITY_HEADER} ${UTILITY_SOURCE}
     ${MESH_HEADER} ${MESH_SOURCE} ${SHADER_SOURCE})
 
+SET(LIBS ${LIBS} GLEW)
+MESSAGE("LIBS=${LIBS}")
+MESSAGE("GLEW_LIB_DIR=${GLEW_LIB_DIR}")
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 
 #Copy shader files to where executable is

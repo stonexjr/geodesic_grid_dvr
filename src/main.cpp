@@ -26,13 +26,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 //User is highly recommended to enhance this sample with an interactive transfer function editor
 //to adjust the color map on-the-fly.
 
-#if defined(__APPLE__) || defined(MACOSX)
-#include <gl.h>
-#include <gl3.h>
-#include <OpenGL.h>
-#else
 #include <GL/glew.h>
-#endif
 #include <iostream>
 #include <GL/freeglut.h>
 #include <mat4.h>
@@ -123,7 +117,7 @@ void loadData(){
 void loadTF(){
     ifstream ifs(tfFilePath, ios::binary);
     if (!ifs){
-        cerr << __func__": Cannot find transfer function file " << tfFilePath << endl;
+        cerr << __func__<<": Cannot find transfer function file " << tfFilePath << endl;
         exit(1);
     }
     vector<unsigned int> tfRGBAArray(tfResolution,0);
@@ -146,7 +140,8 @@ void loadTF(){
     davinci::GLError::glCheckError("glslSetTransferFunc(): failed!");
     //initialize one white light default at the origin of camera space.
     davinci::GLContext::g_lights.push_back(davinci::GLLights());
-    m_mesh->SetMaterial(davinci::vec4f(0.5f/*Kamb*/, 0.83f/*Kdif*/, 0.89f/*Kspe*/, 20.0f/*Kshi*/));
+    davinci::vec4f material(0.5f/*Kamb*/, 0.83f/*Kdif*/, 0.89f/*Kspe*/, 20.0f/*Kshi*/);
+    m_mesh->SetMaterial(material);
     m_mesh->SetStepSize(ui.fStepSize);
     m_mesh->ToggleLighting(ui.bEnableLighting);
     m_mesh->SetLight(davinci::GLContext::g_lights[0]);

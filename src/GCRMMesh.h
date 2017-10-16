@@ -38,7 +38,8 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 #include <GLTextureBufferObject.h>
 
 struct GCRMPrism;
-class davinci::vec3i;
+using namespace davinci;
+class vec3i;
 
 
 bool isCCW(davinci::vec3f v0, davinci::vec3f v1, davinci::vec3f v2);

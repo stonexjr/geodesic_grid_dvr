@@ -58,5 +58,5 @@ string Dir::sptr="\\";
 string Dir::nonstdSptr = "/";
 #else
 std::string Dir::sptr="/";
-string Dir::nonstdSptr = "\";
+string Dir::nonstdSptr = "\\";
 #endif

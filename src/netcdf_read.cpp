@@ -302,7 +302,7 @@ int NetCDF::get_vardata_impl(NetCDF_var *var,
         */
         string cur_dim_name(var->dim[j]->dim_name);
         std::transform(cur_dim_name.begin(), cur_dim_name.end(),
-            cur_dim_name.begin(), tolower);
+                       cur_dim_name.begin(), [](char c){ return tolower(c); } );
 
         //if(strcmp(var->dim[j]->dim_name,"time")==0){
         if (cur_dim_name == "time")
