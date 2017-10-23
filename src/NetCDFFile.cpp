@@ -21,6 +21,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "NetCDFFile.h"
+#include <cstring>
 
 string NetCDFFile::dummyName="dummyFile";
 NetCDFFile NetCDFFile::dummyFile("dummyFile");
