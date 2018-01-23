@@ -136,8 +136,7 @@ The project CMake file is configured to automatically copy those two folders to 
 In case the automation step fails, you need to manually do so.
 
 * Dynamic linkage library dependency  
-Make sure the dll or so lib files from glew, freeglut, and netcdf can be found by your application.
-or else export their path to LD_LIRARY_PATH on linux machine
+Make sure the *.dll or *.so lib files from glew, freeglut, and netcdf can be found by your application. Or else please export their path to LD_LIRARY_PATH on linux machine
 ```
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:path/to/*.so"
 ```
