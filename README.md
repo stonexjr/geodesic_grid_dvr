@@ -12,7 +12,8 @@ The rendering algorithm is based on the publication [Interactive Ray Casting of 
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh_solid.PNG?raw=true" width="200">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh_solid.PNG?raw=true" width="200">
 
-Note that the first two images above are rendered using high resolution dataset which is not available in this repository.
+Image rendered by the GeodesicGridDVR. Note that the first two images above are rendered using high resolution dataset which is not available in this repository.
+
 
 # Citations and Reuse
 If you find this work useful in your research, please consider citing:
@@ -134,7 +135,7 @@ During launch, it'll look for them in the `data` folder and `config` folder resp
 The project CMake file is configured to automatically copy those two folders to location where the exectutable is generated.
 In case the automation step fails, you need to manually do so.
 
-* Dynamic linkage library dependency
+* Dynamic linkage library dependency  
 Make sure the dll or so lib files from glew, freeglut, and netcdf can be found by your application.
 or else export their path to LD_LIRARY_PATH on linux machine
 ```
