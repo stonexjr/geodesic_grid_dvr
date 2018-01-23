@@ -1,4 +1,6 @@
 # GeodesicGridDVR Overview
+This repository has the source code and a simple test dataset for the paper "Interactive Ray Casting of Geodesic Grids" (EuroVis13). The [paper](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf) and [errata](http://vis.cs.ucdavis.edu/~jrxie/img/pub/errata.pdf) is available for download.  
+
 GeodesicGridDVR is an open source, GPU based high-performance direct volume rendering of [spherical geodesic grid](https://en.wikipedia.org/wiki/Geodesic_grid).
 The GeodesicGridDVR core rendering code is based on OpenGL GLSL, and runs on anything from laptop, to workstations.
 The rendering algorithm is based on the publication [Interactive Ray Casting of Geodesic Grids](http://vis.cs.ucdavis.edu/~jrxie/img/pub/2013.Interactive.Ray.Casting.of.Geodesic.Grids.pdf).
@@ -10,6 +12,28 @@ The rendering algorithm is based on the publication [Interactive Ray Casting of 
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_hexagon_mesh_solid.PNG?raw=true" width="200">
 <img src="https://github.com/stonexjr/geodesic_grid_dvr/blob/master/resource/gcrm_220km_triangle_mesh_solid.PNG?raw=true" width="200">
 
+Note that the first two images above are rendered using high resolution dataset which is not available in this repository.
+
+# Citations and Reuse
+If you find this work useful in your research, please consider citing:
+```
+J. Xie, H. Yu, and K.-L. Ma. Interactive ray casting of geodesic grids.
+In Proceedings of the 15th Eurographics Conference on Visualization,
+EuroVis ’13, pages 481–490, 2013
+```
+BibTeX citation
+```
+@inproceedings{xie2013interactive,
+  title={Interactive ray casting of geodesic grids},
+  author={Xie, Jinrong and Yu, Hongfeng and Ma, Kwan-Liu},
+  booktitle={Computer Graphics Forum},
+  volume={32},
+  number={3pt4},
+  pages={481--490},
+  year={2013},
+  organization={Wiley Online Library}
+}
+```
 
 # Support and Contact
 GeodesicGridDVR uses cmake for cross-platform build. We do our best to guarantee stable release versions. However, a certain number of bugs, as-yet-missing features, inconsistencies, or any other issues are still possible.
@@ -141,26 +165,6 @@ mouse wheel: scale object
 This work was made possible by the support of the ViDi lab at University of California Davis.  
 Data courtesy of Karen Schuchardt at Pacific Northwest National Laboratory.
 
-# Citations and Reuse
-For attribution in academic contexts, please cite this work as
-```
-J. Xie, H. Yu, and K.-L. Ma. Interactive ray casting of geodesic grids.
-In Proceedings of the 15th Eurographics Conference on Visualization,
-EuroVis ’13, pages 481–490, 2013
-```
-BibTeX citation
-```
-@inproceedings{xie2013interactive,
-  title={Interactive ray casting of geodesic grids},
-  author={Xie, Jinrong and Yu, Hongfeng and Ma, Kwan-Liu},
-  booktitle={Computer Graphics Forum},
-  volume={32},
-  number={3pt4},
-  pages={481--490},
-  year={2013},
-  organization={Wiley Online Library}
-}
-```
 # License
 The [source available on GitHub](https://github.com/stonexjr/geodesic_grid_dvr) is under MIT license.
 Images used in the repository are licensed under Creative Commons Attribution [CC-BY 2.0](https://creativecommons.org/licenses/by/2.0/) unless noted otherwise. Some figures that have been reused from other sources don't fall under this license.
