@@ -18,9 +18,9 @@ Image rendered by the GeodesicGridDVR. Note that the first two images above are 
 # Citations and Reuse
 If you find this work useful in your research, please consider citing:
 ```
-J. Xie, H. Yu, and K.-L. Ma. Interactive ray casting of geodesic grids.
-In Proceedings of the 15th Eurographics Conference on Visualization,
-EuroVis ’13, pages 481–490, 2013
+Xie, Jinrong, Hongfeng Yu, and Kwan‐Liu Ma.
+"Interactive ray casting of geodesic grids."
+Computer Graphics Forum. Vol. 32. No. 3pt4. Blackwell Publishing Ltd, 2013.
 ```
 BibTeX citation
 ```
@@ -33,6 +33,23 @@ BibTeX citation
   pages={481--490},
   year={2013},
   organization={Wiley Online Library}
+}
+```
+
+```
+Xie, Jinrong, Hongfeng Yu, and Kwan-Liu Maz. 
+"Visualizing large 3D geodesic grid data with massively distributed GPUs." 
+Large Data Analysis and Visualization (LDAV), 2014 IEEE 4th Symposium on. IEEE, 2014.
+```
+BibTeX citation
+```
+@inproceedings{xie2014visualizing,
+  title={Visualizing large 3D geodesic grid data with massively distributed GPUs},
+  author={Xie, Jinrong and Yu, Hongfeng and Maz, Kwan-Liu},
+  booktitle={Large Data Analysis and Visualization (LDAV), 2014 IEEE 4th Symposium on},
+  pages={3--10},
+  year={2014},
+  organization={IEEE}
 }
 ```
 
